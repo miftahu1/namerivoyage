@@ -14,8 +14,7 @@ import {
   doc, 
   query, 
   orderBy,
-  setDoc,
-  serverTimestamp
+  setDoc
 } from 'firebase/firestore';
 
 export interface TripData {
@@ -82,19 +81,18 @@ export function useNameriStore() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // 1. Sync Trip Data
+    // Sync Trip Settings
     const tripDocRef = doc(db, 'settings', 'trip');
     const unsubTrip = onSnapshot(tripDocRef, (doc) => {
       if (doc.exists()) {
         setTrip(doc.data() as TripData);
       } else {
-        // Only seed if absolutely necessary to avoid write cycles on mount
         setDoc(tripDocRef, DEFAULT_TRIP);
       }
       setIsInitialized(true);
     });
 
-    // 2. Sync Students - Optimized query
+    // Sync Students
     const studentsRef = collection(db, 'students');
     const qStudents = query(studentsRef, orderBy('createdAt', 'desc'));
     const unsubStudents = onSnapshot(qStudents, (snapshot) => {
@@ -102,7 +100,7 @@ export function useNameriStore() {
       setStudents(data);
     });
 
-    // 3. Sync Announcements - Optimized query
+    // Sync Announcements
     const announcementsRef = collection(db, 'announcements');
     const qAnnouncements = query(announcementsRef, orderBy('timestamp', 'desc'));
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
@@ -124,8 +122,6 @@ export function useNameriStore() {
 
   const addStudent = async (student: Omit<Student, 'id' | 'status' | 'feesStatus' | 'createdAt'>) => {
     const studentsRef = collection(db, 'students');
-    // We don't need to wait for the server before moving the UI to success state
-    // but we use await to ensure the promise is handled for errors.
     return addDoc(studentsRef, {
       ...student,
       status: 'pending',

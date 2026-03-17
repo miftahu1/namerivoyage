@@ -39,44 +39,43 @@ export default function LandingPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.fullName || !formData.classSection || !formData.phone || !formData.guardianContact) {
       toast({ 
         variant: "destructive", 
         title: "Missing Information", 
-        description: "Please fill in all mandatory fields to secure your spot." 
+        description: "Please fill in all mandatory fields." 
       });
       return;
     }
 
     setIsSubmitting(true);
     
-    try {
-      await addStudent(formData);
-      setSubmitted(true);
-      toast({ 
-        title: "Registration Recorded", 
-        description: "Your request has been sent for teacher approval." 
+    // Optimistic UI update: Show success immediately while the write happens in background
+    addStudent({ ...formData })
+      .then(() => {
+        // Success handled silently by the UI switch
+      })
+      .catch((error) => {
+        console.error("Submission error:", error);
+        setSubmitted(false);
+        setIsSubmitting(false);
+        toast({ 
+          variant: "destructive", 
+          title: "Network Error", 
+          description: "We couldn't reach the database. Please check your signal." 
+        });
       });
-      setFormData({
-        fullName: '',
-        classSection: '',
-        phone: '',
-        guardianContact: '',
-        medicalConditions: ''
-      });
-    } catch (e) {
-      console.error("Submission error:", e);
-      toast({ 
-        variant: "destructive", 
-        title: "Submission Error", 
-        description: "We couldn't process your registration. Please check your connection." 
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+
+    // Immediate feedback
+    setSubmitted(true);
+    setIsSubmitting(false);
+    toast({ 
+      title: "Success", 
+      description: "Registration request sent." 
+    });
   };
 
   const approvedStudents = students.filter(s => s.status === 'approved');
@@ -105,9 +104,9 @@ export default function LandingPage() {
             src={heroImage?.imageUrl || ""} 
             alt="Nameri National Park" 
             fill 
-            className="object-cover opacity-20 grayscale-[10%]" 
+            className="object-cover opacity-20" 
             priority 
-            data-ai-hint="nature forest river"
+            data-ai-hint="nature forest"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background" />
         </div>
@@ -121,7 +120,7 @@ export default function LandingPage() {
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-lg mx-auto font-medium leading-relaxed">
             Arunodoi Academy's Class 12 grand finale expedition. One day of pure nature and unforgettable bonding.
           </p>
-          <Button size="lg" className="rounded-full px-12 h-16 text-xl bg-primary hover:bg-primary/90 shadow-2xl transition-all hover:scale-105 active:scale-95" asChild>
+          <Button size="lg" className="rounded-full px-12 h-16 text-xl bg-primary hover:bg-primary/90 shadow-2xl transition-all hover:scale-105" asChild>
             <a href="#register">Register Now</a>
           </Button>
         </div>
@@ -139,7 +138,7 @@ export default function LandingPage() {
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
               {announcements.map((ann) => (
-                <Card key={ann.id} className="border-none shadow-xl bg-white/50 backdrop-blur-sm hover:shadow-2xl transition-all overflow-hidden group rounded-3xl">
+                <Card key={ann.id} className="border-none shadow-xl bg-white/50 backdrop-blur-sm overflow-hidden group rounded-3xl">
                   <div className="h-1.5 bg-primary/20 group-hover:bg-primary transition-colors" />
                   <CardHeader className="p-6 pb-2">
                     <CardTitle className="text-lg font-bold flex justify-between items-start gap-4">
@@ -169,7 +168,7 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             {approvedStudents.map((student) => (
-              <div key={student.id} className="bg-white border-2 border-primary/5 px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-sm hover:border-primary/20 transition-all hover:-translate-y-0.5 cursor-default">
+              <div key={student.id} className="bg-white border-2 border-primary/5 px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-sm">
                 {student.fullName} 
                 <span className="opacity-50 text-[10px] bg-muted px-2.5 py-1 rounded-full font-black uppercase tracking-tighter">
                   {student.classSection}
@@ -200,7 +199,7 @@ export default function LandingPage() {
                 { icon: Users, label: "Teachers", val: trip.organizedBy.slice(0, 2).join(', ') },
                 { icon: Calendar, label: "Duration", val: "1 Full Day" },
               ].map((item, idx) => (
-                <div key={idx} className="flex flex-col gap-4 p-8 rounded-[32px] border-2 border-primary/5 bg-white/40 shadow-sm backdrop-blur-sm hover:border-primary/20 transition-all">
+                <div key={idx} className="flex flex-col gap-4 p-8 rounded-[32px] border-2 border-primary/5 bg-white/40 shadow-sm backdrop-blur-sm">
                   <div className="bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center">
                     <item.icon className="w-6 h-6 text-primary" />
                   </div>
@@ -229,102 +228,94 @@ export default function LandingPage() {
                     <div className="space-y-3">
                       <p className="text-3xl font-black text-primary">Done!</p>
                       <p className="text-muted-foreground font-medium max-w-[300px] mx-auto leading-relaxed">
-                        Your registration is successful. Please wait for teacher approval and payment instructions.
+                        Your registration has been submitted. Teachers will review and approve shortly.
                       </p>
                     </div>
                     <Button variant="outline" onClick={() => setSubmitted(false)} className="w-full rounded-2xl h-14 font-bold text-lg border-2">
-                      New Enrolment
+                      Register Another
                     </Button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-3">
                       <Label htmlFor="fullName" className="text-[11px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
-                        <User className="w-3.5 h-3.5" /> Full Legal Name
+                        <User className="w-3.5 h-3.5" /> Full Name
                       </Label>
                       <Input 
                         id="fullName" 
                         name="fullName" 
-                        placeholder="As per school records" 
+                        placeholder="Your full name" 
                         required 
                         value={formData.fullName} 
                         onChange={handleInputChange} 
-                        className="h-14 rounded-2xl border-2 border-muted bg-muted/20 focus:bg-white transition-all text-base font-medium px-5" 
+                        className="h-14 rounded-2xl border-2 border-muted bg-muted/20 text-base font-medium px-5" 
                       />
                     </div>
                     <div className="space-y-3">
                       <Label htmlFor="classSection" className="text-[11px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
-                        <GraduationCap className="w-3.5 h-3.5" /> Class & Section
+                        <GraduationCap className="w-3.5 h-3.5" /> Class
                       </Label>
                       <Input 
                         id="classSection" 
                         name="classSection" 
-                        placeholder="e.g. 12 Sci-A" 
+                        placeholder="e.g. 12-A" 
                         required 
                         value={formData.classSection} 
                         onChange={handleInputChange} 
-                        className="h-14 rounded-2xl border-2 border-muted bg-muted/20 focus:bg-white text-base font-medium px-5" 
+                        className="h-14 rounded-2xl border-2 border-muted bg-muted/20 text-base font-medium px-5" 
                       />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="space-y-3">
                         <Label htmlFor="phone" className="text-[11px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
-                          <Phone className="w-3.5 h-3.5" /> My Contact
+                          <Phone className="w-3.5 h-3.5" /> My Phone
                         </Label>
                         <Input 
                           id="phone" 
                           name="phone" 
-                          placeholder="10-digit number" 
+                          placeholder="Phone number" 
                           required 
                           type="tel" 
                           value={formData.phone} 
                           onChange={handleInputChange} 
-                          className="h-14 rounded-2xl border-2 border-muted bg-muted/20 focus:bg-white text-base font-medium px-5" 
+                          className="h-14 rounded-2xl border-2 border-muted bg-muted/20 text-base font-medium px-5" 
                         />
                       </div>
                       <div className="space-y-3">
                         <Label htmlFor="guardianContact" className="text-[11px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
-                          <ShieldCheck className="w-3.5 h-3.5" /> Emergency
+                          <ShieldCheck className="w-3.5 h-3.5" /> Guardian
                         </Label>
                         <Input 
                           id="guardianContact" 
                           name="guardianContact" 
-                          placeholder="Guardian's contact" 
+                          placeholder="Emergency contact" 
                           required 
                           type="tel" 
                           value={formData.guardianContact} 
                           onChange={handleInputChange} 
-                          className="h-14 rounded-2xl border-2 border-muted bg-muted/20 focus:bg-white text-base font-medium px-5" 
+                          className="h-14 rounded-2xl border-2 border-muted bg-muted/20 text-base font-medium px-5" 
                         />
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="medicalConditions" className="text-[11px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
-                          <Stethoscope className="w-3.5 h-3.5" /> Medical Notes
-                        </Label>
-                        <Badge variant="ghost" className="text-[9px] font-black uppercase opacity-60">Optional</Badge>
-                      </div>
+                      <Label htmlFor="medicalConditions" className="text-[11px] font-black uppercase text-muted-foreground tracking-[0.2em] flex items-center gap-2">
+                        <Stethoscope className="w-3.5 h-3.5" /> Medical (Optional)
+                      </Label>
                       <Textarea 
                         id="medicalConditions" 
                         name="medicalConditions" 
-                        placeholder="Any allergies or conditions..." 
+                        placeholder="Any allergies?" 
                         value={formData.medicalConditions} 
                         onChange={handleInputChange} 
-                        className="min-h-[120px] rounded-[24px] border-2 border-muted bg-muted/20 focus:bg-white text-base font-medium p-5 resize-none transition-all" 
+                        className="min-h-[100px] rounded-[24px] border-2 border-muted bg-muted/20 text-base font-medium p-5 resize-none" 
                       />
                     </div>
                     <Button 
                       type="submit" 
-                      className="w-full h-16 font-black text-xl bg-primary hover:bg-primary/90 rounded-[24px] shadow-2xl mt-4 transition-all active:scale-[0.98] disabled:opacity-70" 
+                      className="w-full h-16 font-black text-xl bg-primary hover:bg-primary/90 rounded-[24px] shadow-2xl mt-4 transition-all" 
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? (
-                        <span className="flex items-center gap-2">
-                          <span className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full" />
-                          Processing...
-                        </span>
-                      ) : "Secure My Spot"}
+                      {isSubmitting ? "Submitting..." : "Secure My Spot"}
                     </Button>
                     <div className="flex items-center justify-center gap-2 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
                       <Info className="w-3 h-3" /> Secure Submission
