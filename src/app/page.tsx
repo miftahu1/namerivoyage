@@ -39,6 +39,17 @@ export default function LandingPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleResetForm = () => {
+    setFormData({
+      fullName: '',
+      classSection: '',
+      phone: '',
+      guardianContact: '',
+      medicalConditions: ''
+    });
+    setSubmitted(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -231,7 +242,7 @@ export default function LandingPage() {
                         Your registration has been submitted. Teachers will review and approve shortly.
                       </p>
                     </div>
-                    <Button variant="outline" onClick={() => setSubmitted(false)} className="w-full rounded-2xl h-14 font-bold text-lg border-2">
+                    <Button variant="outline" onClick={handleResetForm} className="w-full rounded-2xl h-14 font-bold text-lg border-2">
                       Register Another
                     </Button>
                   </div>
