@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -13,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Bell, Search, CheckCircle, XCircle, Trash2, 
-  LogOut, Shield, Lock, CreditCard, ExternalLink, Settings, Save, MapPin, Clock, Calendar, UserCheck
+  LogOut, Shield, Lock, CreditCard, ExternalLink, Settings, Save, MapPin, Clock, Calendar, UserCheck, Plus
 } from 'lucide-react';
 
 const SESSION_KEY = 'nameri_admin_session';
@@ -76,10 +77,8 @@ export default function AdminPage() {
   const handleSaveSettings = () => {
     if (!tripForm) return;
     
-    // Optimistic feedback: Show success immediately while the write happens
     setIsSavingSettings(true);
     
-    // Trigger the save in the background
     saveTrip(tripForm)
       .then(() => {
         toast({ title: "Settings Saved", description: "Trip details updated successfully." });
@@ -89,7 +88,6 @@ export default function AdminPage() {
         toast({ variant: "destructive", title: "Save Failed", description: "Could not update settings." });
       })
       .finally(() => {
-        // Reset saving state after a small delay to prevent double-clicks
         setTimeout(() => setIsSavingSettings(false), 500);
       });
   };
@@ -128,7 +126,7 @@ export default function AdminPage() {
   
   // Calculate total collected based on approved students who have paid
   const feesPaidConfirmedCount = students.filter(s => s.status === 'approved' && s.feesStatus === 'paid').length;
-  const feeNumeric = parseInt(trip.feeAmount.replace(/[^0-9]/g, '')) || 0;
+  const feeNumeric = tripForm ? (parseInt(tripForm.feeAmount.replace(/[^0-9]/g, '')) || 0) : 0;
   const totalCollected = feeNumeric * feesPaidConfirmedCount;
   const formattedTotal = `₹${totalCollected.toLocaleString('en-IN')}`;
 
@@ -156,7 +154,7 @@ export default function AdminPage() {
             { label: "Total Students", val: students.length, color: "bg-primary" },
             { label: "Confirmed", val: approvedCount, color: "bg-secondary" },
             { label: "Amount Collected", val: formattedTotal, color: "bg-blue-600" },
-            { label: "Capacity", val: `${approvedCount}/${trip.capacity}`, color: "bg-muted text-foreground" },
+            { label: "Capacity", val: `${approvedCount}/${tripForm?.capacity || trip.capacity}`, color: "bg-muted text-foreground" },
           ].map((stat, i) => (
             <Card key={i} className={`${stat.color} text-white border-none shadow-lg rounded-3xl`}>
               <CardContent className="p-6 flex flex-col items-center justify-center text-center">
@@ -317,46 +315,138 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent className="p-8 pt-6">
                 {tripForm && (
-                  <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> Trip Name</Label>
-                        <Input value={tripForm.name} onChange={e => setTripForm(p => p ? ({ ...p, name: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> Primary Location</Label>
-                        <Input value={tripForm.location} onChange={e => setTripForm(p => p ? ({ ...p, location: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-10">
+                    <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
+                      <div className="space-y-6">
                         <div className="space-y-2">
-                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Departure</Label>
-                          <Input value={tripForm.departureTime} onChange={e => setTripForm(p => p ? ({ ...p, departureTime: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> Trip Name</Label>
+                          <Input value={tripForm.name} onChange={e => setTripForm(p => p ? ({ ...p, name: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Return</Label>
-                          <Input value={tripForm.returnTime} onChange={e => setTripForm(p => p ? ({ ...p, returnTime: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> Primary Location</Label>
+                          <Input value={tripForm.location} onChange={e => setTripForm(p => p ? ({ ...p, location: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Departure</Label>
+                            <Input value={tripForm.departureTime} onChange={e => setTripForm(p => p ? ({ ...p, departureTime: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Return</Label>
+                            <Input value={tripForm.returnTime} onChange={e => setTripForm(p => p ? ({ ...p, returnTime: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> Trip Date</Label>
+                            <Input type="date" value={tripForm.startDate} onChange={e => setTripForm(p => p ? ({ ...p, startDate: e.target.value, endDate: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><UserCheck className="w-3.5 h-3.5" /> Capacity</Label>
+                            <Input type="number" value={tripForm.capacity} onChange={e => setTripForm(p => p ? ({ ...p, capacity: parseInt(e.target.value) }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><CreditCard className="w-3.5 h-3.5" /> Trip Fees</Label>
+                          <Input value={tripForm.feeAmount} onChange={e => setTripForm(p => p ? ({ ...p, feeAmount: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" placeholder="e.g. ₹1,500" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Shield className="w-3.5 h-3.5" /> Emergency Contact</Label>
+                          <Input value={tripForm.emergencyContact} onChange={e => setTripForm(p => p ? ({ ...p, emergencyContact: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+
+                    <div className="pt-8 border-t">
+                      <h3 className="text-lg font-bold mb-6">Staff & Logistics</h3>
+                      <div className="space-y-6">
                         <div className="space-y-2">
-                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> Trip Date</Label>
-                          <Input type="date" value={tripForm.startDate} onChange={e => setTripForm(p => p ? ({ ...p, startDate: e.target.value, endDate: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest">Organizers (Comma separated)</Label>
+                          <Input 
+                            value={tripForm.organizedBy.join(', ')} 
+                            onChange={e => setTripForm(p => p ? ({ ...p, organizedBy: e.target.value.split(',').map(s => s.trim()).filter(s => s !== '') }) : null)} 
+                            className="h-12 rounded-2xl border-muted-foreground/10" 
+                          />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><UserCheck className="w-3.5 h-3.5" /> Capacity</Label>
-                          <Input type="number" value={tripForm.capacity} onChange={e => setTripForm(p => p ? ({ ...p, capacity: parseInt(e.target.value) }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                        
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest">Trip Itinerary</Label>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="rounded-full h-8 px-4 text-[10px] font-black uppercase tracking-widest"
+                              onClick={() => {
+                                setTripForm(p => p ? {
+                                  ...p,
+                                  itinerary: [...p.itinerary, { day: p.itinerary.length + 1, title: 'New Stop', activities: [], description: '' }]
+                                } : null)
+                              }}
+                            >
+                              <Plus className="w-3 h-3 mr-1" /> Add Day
+                            </Button>
+                          </div>
+                          <div className="space-y-4">
+                            {tripForm.itinerary.map((item, idx) => (
+                              <div key={idx} className="p-6 rounded-3xl border border-muted/40 bg-muted/5 space-y-4 relative">
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  className="absolute top-4 right-4 text-destructive h-8 w-8 hover:bg-destructive/10 rounded-full"
+                                  onClick={() => {
+                                    setTripForm(p => p ? {
+                                      ...p,
+                                      itinerary: p.itinerary.filter((_, i) => i !== idx)
+                                    } : null)
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-[10px] font-bold uppercase">Day {item.day} Title</Label>
+                                    <Input 
+                                      value={item.title} 
+                                      onChange={e => {
+                                        const newItinerary = [...tripForm.itinerary];
+                                        newItinerary[idx].title = e.target.value;
+                                        setTripForm({ ...tripForm, itinerary: newItinerary });
+                                      }}
+                                      className="h-10 rounded-xl"
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-[10px] font-bold uppercase">Activities (Comma separated)</Label>
+                                    <Input 
+                                      value={item.activities.join(', ')} 
+                                      onChange={e => {
+                                        const newItinerary = [...tripForm.itinerary];
+                                        newItinerary[idx].activities = e.target.value.split(',').map(s => s.trim()).filter(s => s !== '');
+                                        setTripForm({ ...tripForm, itinerary: newItinerary });
+                                      }}
+                                      className="h-10 rounded-xl"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-[10px] font-bold uppercase">Description</Label>
+                                  <Textarea 
+                                    value={item.description} 
+                                    onChange={e => {
+                                      const newItinerary = [...tripForm.itinerary];
+                                      newItinerary[idx].description = e.target.value;
+                                      setTripForm({ ...tripForm, itinerary: newItinerary });
+                                    }}
+                                    className="min-h-[80px] rounded-xl"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><CreditCard className="w-3.5 h-3.5" /> Trip Fees</Label>
-                        <Input value={tripForm.feeAmount} onChange={e => setTripForm(p => p ? ({ ...p, feeAmount: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" placeholder="e.g. ₹1,500" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Shield className="w-3.5 h-3.5" /> Emergency Contact</Label>
-                        <Input value={tripForm.emergencyContact} onChange={e => setTripForm(p => p ? ({ ...p, emergencyContact: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
                       </div>
                     </div>
                   </div>
