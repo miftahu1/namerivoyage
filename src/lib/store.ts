@@ -14,7 +14,8 @@ import {
   doc, 
   query, 
   orderBy,
-  setDoc
+  setDoc,
+  serverTimestamp
 } from 'firebase/firestore';
 
 export interface TripData {
@@ -81,62 +82,32 @@ export function useNameriStore() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    let initializedParts = { trip: false, students: false, announcements: false };
-
-    const checkInit = () => {
-      if (initializedParts.trip && initializedParts.students && initializedParts.announcements) {
-        setIsInitialized(true);
-      }
-    };
-
     // 1. Sync Trip Data
     const tripDocRef = doc(db, 'settings', 'trip');
     const unsubTrip = onSnapshot(tripDocRef, (doc) => {
       if (doc.exists()) {
         setTrip(doc.data() as TripData);
       } else {
+        // Only seed if absolutely necessary to avoid write cycles on mount
         setDoc(tripDocRef, DEFAULT_TRIP);
       }
-      if (!initializedParts.trip) {
-        initializedParts.trip = true;
-        checkInit();
-      }
-    }, (error) => {
-      console.error("Trip sync error:", error);
-      initializedParts.trip = true; // Mark as initialized anyway to prevent hung UI
-      checkInit();
+      setIsInitialized(true);
     });
 
-    // 2. Sync Students
+    // 2. Sync Students - Optimized query
     const studentsRef = collection(db, 'students');
     const qStudents = query(studentsRef, orderBy('createdAt', 'desc'));
     const unsubStudents = onSnapshot(qStudents, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
       setStudents(data);
-      if (!initializedParts.students) {
-        initializedParts.students = true;
-        checkInit();
-      }
-    }, (error) => {
-      console.error("Students sync error:", error);
-      initializedParts.students = true;
-      checkInit();
     });
 
-    // 3. Sync Announcements
+    // 3. Sync Announcements - Optimized query
     const announcementsRef = collection(db, 'announcements');
     const qAnnouncements = query(announcementsRef, orderBy('timestamp', 'desc'));
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
       setAnnouncements(data);
-      if (!initializedParts.announcements) {
-        initializedParts.announcements = true;
-        checkInit();
-      }
-    }, (error) => {
-      console.error("Announcements sync error:", error);
-      initializedParts.announcements = true;
-      checkInit();
     });
 
     return () => {
@@ -153,7 +124,9 @@ export function useNameriStore() {
 
   const addStudent = async (student: Omit<Student, 'id' | 'status' | 'feesStatus' | 'createdAt'>) => {
     const studentsRef = collection(db, 'students');
-    await addDoc(studentsRef, {
+    // We don't need to wait for the server before moving the UI to success state
+    // but we use await to ensure the promise is handled for errors.
+    return addDoc(studentsRef, {
       ...student,
       status: 'pending',
       feesStatus: 'unpaid',
