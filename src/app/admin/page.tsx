@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNameriStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -17,6 +17,9 @@ import {
   Save, LogOut, Shield, Lock, CreditCard, ExternalLink
 } from 'lucide-react';
 
+const SESSION_KEY = 'nameri_admin_session';
+const SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -29,14 +32,37 @@ export default function AdminPage() {
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '' });
   const [searchTerm, setSearchTerm] = useState('');
 
+  useEffect(() => {
+    const session = localStorage.getItem(SESSION_KEY);
+    if (session) {
+      try {
+        const { timestamp } = JSON.parse(session);
+        const now = Date.now();
+        if (now - timestamp < SESSION_TIMEOUT) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem(SESSION_KEY);
+        }
+      } catch (e) {
+        localStorage.removeItem(SESSION_KEY);
+      }
+    }
+  }, []);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'Nameri@26') {
       setIsAuthenticated(true);
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ timestamp: Date.now() }));
       toast({ title: "Access Granted" });
     } else {
       toast({ variant: "destructive", title: "Access Denied" });
     }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem(SESSION_KEY);
   };
 
   if (!isInitialized) return null;
@@ -79,7 +105,7 @@ export default function AdminPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild><a href="/"><ExternalLink className="w-4 h-4 mr-1" /> View Site</a></Button>
-          <Button variant="outline" size="sm" onClick={() => setIsAuthenticated(false)}><LogOut className="w-4 h-4 mr-1" /> Exit</Button>
+          <Button variant="outline" size="sm" onClick={handleLogout}><LogOut className="w-4 h-4 mr-1" /> Exit</Button>
         </div>
       </header>
 
