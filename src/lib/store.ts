@@ -14,8 +14,7 @@ import {
   doc, 
   query, 
   orderBy,
-  setDoc,
-  getDoc
+  setDoc
 } from 'firebase/firestore';
 
 export interface TripData {
@@ -67,11 +66,11 @@ const DEFAULT_TRIP: TripData = {
       day: 1, 
       title: "Nature & Adventure Day", 
       activities: ["Jungle Trek", "River Rafting", "Wildlife Observation"], 
-      description: "A high-intensity day starting with an early morning jungle trek through the sanctuary. After a quick forest-side lunch, we'll navigate the Jia Bhoroli river for rafting before heading back to the school by evening." 
+      description: "A high-intensity day starting with an early morning jungle trek through the sanctuary." 
     }
   ],
-  packingList: ["Comfortable Shoes", "Water Bottle", "Sunscreen", "Personal Medication", "School ID Card", "Camera"],
-  rules: ["Strict adherence to schedule", "No straying from the group", "Environment conservation (no littering)", "Respect forest guards and locals", "Smartphone usage restricted during activities"],
+  packingList: ["Comfortable Shoes", "Water Bottle", "Sunscreen", "Personal Medication", "School ID Card"],
+  rules: ["Strict adherence to schedule", "No straying from the group", "Environment conservation"],
   emergencyContact: "+91 98765-43210 (Mr. Das)"
 };
 
@@ -82,32 +81,44 @@ export function useNameriStore() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    let initializedParts = { trip: false, students: false, announcements: false };
+
+    const checkInit = () => {
+      if (initializedParts.trip && initializedParts.students && initializedParts.announcements) {
+        setIsInitialized(true);
+      }
+    };
+
     // 1. Sync Trip Data
     const tripDocRef = doc(db, 'settings', 'trip');
     const unsubTrip = onSnapshot(tripDocRef, (doc) => {
       if (doc.exists()) {
         setTrip(doc.data() as TripData);
       } else {
-        // Initialize if doesn't exist
         setDoc(tripDocRef, DEFAULT_TRIP);
       }
+      initializedParts.trip = true;
+      checkInit();
     });
 
-    // 2. Sync Students (Real-time)
+    // 2. Sync Students
     const studentsRef = collection(db, 'students');
     const qStudents = query(studentsRef, orderBy('createdAt', 'desc'));
     const unsubStudents = onSnapshot(qStudents, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
       setStudents(data);
+      initializedParts.students = true;
+      checkInit();
     });
 
-    // 3. Sync Announcements (Real-time)
+    // 3. Sync Announcements
     const announcementsRef = collection(db, 'announcements');
     const qAnnouncements = query(announcementsRef, orderBy('timestamp', 'desc'));
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
       setAnnouncements(data);
-      setIsInitialized(true);
+      initializedParts.announcements = true;
+      checkInit();
     });
 
     return () => {
