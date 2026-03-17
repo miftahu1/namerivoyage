@@ -14,7 +14,8 @@ import {
   doc, 
   query, 
   orderBy,
-  setDoc
+  setDoc,
+  getDoc
 } from 'firebase/firestore';
 
 export interface TripData {
@@ -87,12 +88,21 @@ export function useNameriStore() {
   useEffect(() => {
     // Sync Trip Settings
     const tripDocRef = doc(db, 'settings', 'trip');
+    
+    // Check if doc exists initially to seed it if missing
+    getDoc(tripDocRef).then((docSnap) => {
+      if (!docSnap.exists()) {
+        setDoc(tripDocRef, DEFAULT_TRIP);
+      }
+    }).catch(console.error);
+
     const unsubTrip = onSnapshot(tripDocRef, (doc) => {
       if (doc.exists()) {
         setTrip(doc.data() as TripData);
-      } else {
-        setDoc(tripDocRef, DEFAULT_TRIP);
       }
+      setIsInitialized(true);
+    }, (error) => {
+      console.error("Trip sync error:", error);
       setIsInitialized(true);
     });
 
@@ -102,7 +112,7 @@ export function useNameriStore() {
     const unsubStudents = onSnapshot(qStudents, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
       setStudents(data);
-    });
+    }, (error) => console.error("Students sync error:", error));
 
     // Sync Announcements
     const announcementsRef = collection(db, 'announcements');
@@ -110,7 +120,7 @@ export function useNameriStore() {
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
       setAnnouncements(data);
-    });
+    }, (error) => console.error("Announcements sync error:", error));
 
     return () => {
       unsubTrip();
@@ -121,47 +131,82 @@ export function useNameriStore() {
 
   const saveTrip = async (data: TripData) => {
     const tripDocRef = doc(db, 'settings', 'trip');
-    await setDoc(tripDocRef, data);
+    try {
+      await setDoc(tripDocRef, data);
+    } catch (error) {
+      console.error("Error saving trip:", error);
+      throw error;
+    }
   };
 
   const addStudent = async (student: Omit<Student, 'id' | 'status' | 'feesStatus' | 'createdAt'>) => {
     const studentsRef = collection(db, 'students');
-    return addDoc(studentsRef, {
-      ...student,
-      status: 'pending',
-      feesStatus: 'unpaid',
-      createdAt: new Date().toISOString()
-    });
+    try {
+      return await addDoc(studentsRef, {
+        ...student,
+        status: 'pending',
+        feesStatus: 'unpaid',
+        createdAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error adding student:", error);
+      throw error;
+    }
   };
 
   const updateStudentStatus = async (id: string, status: 'approved' | 'rejected') => {
     const studentRef = doc(db, 'students', id);
-    await updateDoc(studentRef, { status });
+    try {
+      await updateDoc(studentRef, { status });
+    } catch (error) {
+      console.error("Error updating student status:", error);
+      throw error;
+    }
   };
 
   const updateFeesStatus = async (id: string, feesStatus: 'paid' | 'unpaid') => {
     const studentRef = doc(db, 'students', id);
-    await updateDoc(studentRef, { feesStatus });
+    try {
+      await updateDoc(studentRef, { feesStatus });
+    } catch (error) {
+      console.error("Error updating fees status:", error);
+      throw error;
+    }
   };
 
   const deleteStudent = async (id: string) => {
     const studentRef = doc(db, 'students', id);
-    await deleteDoc(studentRef);
+    try {
+      await deleteDoc(studentRef);
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      throw error;
+    }
   };
 
   const addAnnouncement = async (title: string, content: string) => {
     const announcementsRef = collection(db, 'announcements');
-    await addDoc(announcementsRef, {
-      title,
-      content,
-      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-      timestamp: Date.now()
-    });
+    try {
+      await addDoc(announcementsRef, {
+        title,
+        content,
+        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error("Error adding announcement:", error);
+      throw error;
+    }
   };
 
   const deleteAnnouncement = async (id: string) => {
     const announcementRef = doc(db, 'announcements', id);
-    await deleteDoc(announcementRef);
+    try {
+      await deleteDoc(announcementRef);
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      throw error;
+    }
   };
 
   return { 
