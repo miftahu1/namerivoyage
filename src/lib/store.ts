@@ -1,6 +1,22 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
+import { 
+  db 
+} from '@/lib/firebase';
+import { 
+  collection, 
+  onSnapshot, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  query, 
+  orderBy,
+  setDoc,
+  getDoc
+} from 'firebase/firestore';
 
 export interface TripData {
   name: string;
@@ -26,7 +42,6 @@ export interface Student {
   medicalConditions: string;
   status: 'pending' | 'approved' | 'rejected';
   feesStatus: 'paid' | 'unpaid';
-  photoUrl?: string;
   createdAt: string;
 }
 
@@ -35,6 +50,7 @@ export interface Announcement {
   date: string;
   title: string;
   content: string;
+  timestamp: number;
 }
 
 const DEFAULT_TRIP: TripData = {
@@ -59,17 +75,6 @@ const DEFAULT_TRIP: TripData = {
   emergencyContact: "+91 98765-43210 (Mr. Das)"
 };
 
-const DEFAULT_STUDENTS: Student[] = [
-  { id: '1', fullName: "Aryan Sharma", classSection: "12A", phone: "9123456780", guardianContact: "9123456781", medicalConditions: "None", status: 'approved', feesStatus: 'paid', createdAt: new Date().toISOString() },
-  { id: '2', fullName: "Priya Kalita", classSection: "12B", phone: "9123456782", guardianContact: "9123456783", medicalConditions: "Asthma", status: 'approved', feesStatus: 'unpaid', createdAt: new Date().toISOString() },
-  { id: '3', fullName: "Rohan Bora", classSection: "12A", phone: "9123456784", guardianContact: "9123456785", medicalConditions: "None", status: 'pending', feesStatus: 'unpaid', createdAt: new Date().toISOString() }
-];
-
-const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
-  { id: '1', date: "March 1, 2026", title: "Trip Confirmation", content: "The Class 12 excursion is confirmed for March 25th. Registration is now open." },
-  { id: '2', date: "March 5, 2026", title: "One-Day Format", content: "Note that this is a focused one-day adventure to ensure all students can participate before exams." }
-];
-
 export function useNameriStore() {
   const [trip, setTrip] = useState<TripData>(DEFAULT_TRIP);
   const [students, setStudents] = useState<Student[]>([]);
@@ -77,72 +82,84 @@ export function useNameriStore() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const storedTrip = localStorage.getItem('nameri_trip');
-    const storedStudents = localStorage.getItem('nameri_students');
-    const storedAnnouncements = localStorage.getItem('nameri_announcements');
+    // 1. Sync Trip Data
+    const tripDocRef = doc(db, 'settings', 'trip');
+    const unsubTrip = onSnapshot(tripDocRef, (doc) => {
+      if (doc.exists()) {
+        setTrip(doc.data() as TripData);
+      } else {
+        // Initialize if doesn't exist
+        setDoc(tripDocRef, DEFAULT_TRIP);
+      }
+    });
 
-    if (storedTrip) setTrip(JSON.parse(storedTrip));
-    if (storedStudents) setStudents(JSON.parse(storedStudents));
-    else setStudents(DEFAULT_STUDENTS);
-    if (storedAnnouncements) setAnnouncements(JSON.parse(storedAnnouncements));
-    else setAnnouncements(DEFAULT_ANNOUNCEMENTS);
+    // 2. Sync Students (Real-time)
+    const studentsRef = collection(db, 'students');
+    const qStudents = query(studentsRef, orderBy('createdAt', 'desc'));
+    const unsubStudents = onSnapshot(qStudents, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
+      setStudents(data);
+    });
 
-    setIsInitialized(true);
+    // 3. Sync Announcements (Real-time)
+    const announcementsRef = collection(db, 'announcements');
+    const qAnnouncements = query(announcementsRef, orderBy('timestamp', 'desc'));
+    const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
+      setAnnouncements(data);
+      setIsInitialized(true);
+    });
+
+    return () => {
+      unsubTrip();
+      unsubStudents();
+      unsubAnnouncements();
+    };
   }, []);
 
-  const saveTrip = (data: TripData) => {
-    setTrip(data);
-    localStorage.setItem('nameri_trip', JSON.stringify(data));
+  const saveTrip = async (data: TripData) => {
+    const tripDocRef = doc(db, 'settings', 'trip');
+    await setDoc(tripDocRef, data);
   };
 
-  const addStudent = (student: Omit<Student, 'id' | 'status' | 'feesStatus' | 'createdAt'>) => {
-    const newStudent: Student = {
+  const addStudent = async (student: Omit<Student, 'id' | 'status' | 'feesStatus' | 'createdAt'>) => {
+    const studentsRef = collection(db, 'students');
+    await addDoc(studentsRef, {
       ...student,
-      id: Math.random().toString(36).substr(2, 9),
       status: 'pending',
       feesStatus: 'unpaid',
       createdAt: new Date().toISOString()
-    };
-    const newStudents = [newStudent, ...students];
-    setStudents(newStudents);
-    localStorage.setItem('nameri_students', JSON.stringify(newStudents));
-    return newStudent;
+    });
   };
 
-  const updateStudentStatus = (id: string, status: 'approved' | 'rejected') => {
-    const newStudents = students.map(s => s.id === id ? { ...s, status } : s);
-    setStudents(newStudents);
-    localStorage.setItem('nameri_students', JSON.stringify(newStudents));
+  const updateStudentStatus = async (id: string, status: 'approved' | 'rejected') => {
+    const studentRef = doc(db, 'students', id);
+    await updateDoc(studentRef, { status });
   };
 
-  const updateFeesStatus = (id: string, feesStatus: 'paid' | 'unpaid') => {
-    const newStudents = students.map(s => s.id === id ? { ...s, feesStatus } : s);
-    setStudents(newStudents);
-    localStorage.setItem('nameri_students', JSON.stringify(newStudents));
+  const updateFeesStatus = async (id: string, feesStatus: 'paid' | 'unpaid') => {
+    const studentRef = doc(db, 'students', id);
+    await updateDoc(studentRef, { feesStatus });
   };
 
-  const deleteStudent = (id: string) => {
-    const newStudents = students.filter(s => s.id !== id);
-    setStudents(newStudents);
-    localStorage.setItem('nameri_students', JSON.stringify(newStudents));
+  const deleteStudent = async (id: string) => {
+    const studentRef = doc(db, 'students', id);
+    await deleteDoc(studentRef);
   };
 
-  const addAnnouncement = (title: string, content: string) => {
-    const newAnnouncement: Announcement = {
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+  const addAnnouncement = async (title: string, content: string) => {
+    const announcementsRef = collection(db, 'announcements');
+    await addDoc(announcementsRef, {
       title,
-      content
-    };
-    const newAnnouncements = [newAnnouncement, ...announcements];
-    setAnnouncements(newAnnouncements);
-    localStorage.setItem('nameri_announcements', JSON.stringify(newAnnouncements));
+      content,
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      timestamp: Date.now()
+    });
   };
 
-  const deleteAnnouncement = (id: string) => {
-    const newAnnouncements = announcements.filter(a => a.id !== id);
-    setAnnouncements(newAnnouncements);
-    localStorage.setItem('nameri_announcements', JSON.stringify(newAnnouncements));
+  const deleteAnnouncement = async (id: string) => {
+    const announcementRef = doc(db, 'announcements', id);
+    await deleteDoc(announcementRef);
   };
 
   return { 
