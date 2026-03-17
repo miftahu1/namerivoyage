@@ -19,6 +19,8 @@ import {
 } from 'firebase/firestore';
 
 export interface TripData {
+  appName: string;
+  heroTitle: string;
   name: string;
   location: string;
   startDate: string;
@@ -56,6 +58,8 @@ export interface Announcement {
 }
 
 const DEFAULT_TRIP: TripData = {
+  appName: "Nameri Voyage",
+  heroTitle: "LAST TRIP TO NAMERI",
   name: "Class 12 Nameri Trip – Arunodoi Academy",
   location: "Nameri National Park, Assam",
   startDate: "2026-03-25",

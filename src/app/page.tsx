@@ -64,14 +64,17 @@ export default function LandingPage() {
 
     setIsSubmitting(true);
     
-    // Optimistic UI update: Show success immediately while the write happens in background
     addStudent({ ...formData })
       .then(() => {
-        // Success handled silently by the UI switch
+        setSubmitted(true);
+        setIsSubmitting(false);
+        toast({ 
+          title: "Success", 
+          description: "Registration request sent." 
+        });
       })
       .catch((error) => {
         console.error("Submission error:", error);
-        setSubmitted(false);
         setIsSubmitting(false);
         toast({ 
           variant: "destructive", 
@@ -79,14 +82,6 @@ export default function LandingPage() {
           description: "We couldn't reach the database. Please check your signal." 
         });
       });
-
-    // Immediate feedback
-    setSubmitted(true);
-    setIsSubmitting(false);
-    toast({ 
-      title: "Success", 
-      description: "Registration request sent." 
-    });
   };
 
   const approvedStudents = students.filter(s => s.status === 'approved');
@@ -97,7 +92,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TreeDeciduous className="text-primary w-6 h-6" />
-            <span className="font-bold text-primary tracking-tight">Nameri Voyage</span>
+            <span className="font-bold text-primary tracking-tight">{trip.appName}</span>
           </div>
           <Button variant="ghost" size="sm" className="text-primary gap-1.5 rounded-full" asChild>
             <Link href="/admin">
@@ -113,7 +108,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 z-0">
           <Image 
             src={heroImage?.imageUrl || ""} 
-            alt="Nameri National Park" 
+            alt="Hero Background" 
             fill 
             className="object-cover opacity-20" 
             priority 
@@ -125,11 +120,11 @@ export default function LandingPage() {
           <Badge className="mb-8 bg-primary/10 text-primary border-primary/20 font-bold uppercase tracking-widest py-1.5 px-6 rounded-full">
             {new Date(trip.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </Badge>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 text-primary tracking-tight leading-[0.9] uppercase">
-            LAST TRIP <br/> TO NAMERI
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 text-primary tracking-tight leading-[0.9] uppercase whitespace-pre-line">
+            {trip.heroTitle}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-lg mx-auto font-medium leading-relaxed">
-            Arunodoi Academy's Class 12 grand finale expedition. One day of pure nature and unforgettable bonding.
+            {trip.name}. One day of pure nature and unforgettable bonding.
           </p>
           <Button size="lg" className="rounded-full px-12 h-16 text-xl bg-primary hover:bg-primary/90 shadow-2xl transition-all hover:scale-105" asChild>
             <a href="#register">Register Now</a>
@@ -200,15 +195,15 @@ export default function LandingPage() {
             <div>
               <h2 className="text-4xl font-black mb-6 tracking-tight">Expedition <br/>Logistics</h2>
               <p className="text-lg text-muted-foreground leading-relaxed font-medium">
-                Detailed schedule for the Class 12 excursion to Nameri National Park. Please ensure you are at the muster point 15 minutes early.
+                Detailed schedule for the excursion. Please ensure you are at the muster point 15 minutes early.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-6">
               {[
                 { icon: MapPin, label: "Destinations", val: trip.location },
                 { icon: Clock, label: "Departure", val: trip.departureTime },
-                { icon: Users, label: "Teachers", val: trip.organizedBy.slice(0, 2).join(', ') },
-                { icon: Calendar, label: "Duration", val: "1 Full Day" },
+                { icon: Users, label: "Staff", val: trip.organizedBy.slice(0, 2).join(', ') },
+                { icon: Calendar, label: "Duration", val: trip.duration },
               ].map((item, idx) => (
                 <div key={idx} className="flex flex-col gap-4 p-8 rounded-[32px] border-2 border-primary/5 bg-white/40 shadow-sm backdrop-blur-sm">
                   <div className="bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center">
@@ -343,7 +338,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 text-center space-y-8">
           <div className="flex items-center justify-center gap-3">
             <TreeDeciduous className="text-primary w-8 h-8" />
-            <span className="font-black text-2xl tracking-tighter text-primary">Nameri Voyage 2026</span>
+            <span className="font-black text-2xl tracking-tighter text-primary">{trip.appName}</span>
           </div>
           <div className="max-w-md mx-auto">
             <p className="text-[11px] text-muted-foreground uppercase font-black tracking-[0.4em] leading-loose">

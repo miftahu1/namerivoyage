@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useNameriStore, TripData } from '@/lib/store';
+import { useNameriStore, TripData, Student } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter 
+} from "@/components/ui/dialog";
+import { 
   Users, Bell, Search, CheckCircle, XCircle, Trash2, 
-  LogOut, Shield, Lock, CreditCard, ExternalLink, Settings, Save, MapPin, Clock, Calendar, UserCheck, Plus
+  LogOut, Shield, Lock, CreditCard, ExternalLink, Settings, Save, MapPin, Clock, Calendar, UserCheck, Plus, Eye,
+  Type, Image as ImageIcon
 } from 'lucide-react';
 
 const SESSION_KEY = 'nameri_admin_session';
@@ -33,6 +37,7 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [tripForm, setTripForm] = useState<TripData | null>(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   useEffect(() => {
     const session = localStorage.getItem(SESSION_KEY);
@@ -51,7 +56,6 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Sync local form state with remote trip data when it loads
   useEffect(() => {
     if (trip && !tripForm) {
       setTripForm(trip);
@@ -123,8 +127,6 @@ export default function AdminPage() {
   }
 
   const approvedCount = students.filter(s => s.status === 'approved').length;
-  
-  // Calculate total collected based on approved students who have paid
   const feesPaidConfirmedCount = students.filter(s => s.status === 'approved' && s.feesStatus === 'paid').length;
   const feeNumeric = tripForm ? (parseInt(tripForm.feeAmount.replace(/[^0-9]/g, '')) || 0) : 0;
   const totalCollected = feeNumeric * feesPaidConfirmedCount;
@@ -143,7 +145,7 @@ export default function AdminPage() {
           <h1 className="font-bold text-lg text-primary hidden sm:block">Command Center</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="rounded-full h-9" asChild><a href="/"><ExternalLink className="w-4 h-4 mr-1" /> <span className="hidden xs:inline">Live Site</span></a></Button>
+          <Button variant="ghost" size="sm" className="rounded-full h-9" asChild><a href="/" target="_blank"><ExternalLink className="w-4 h-4 mr-1" /> <span className="hidden xs:inline">Live Site</span></a></Button>
           <Button variant="outline" size="sm" className="rounded-full h-9 border-destructive/20 text-destructive hover:bg-destructive/10" onClick={handleLogout}><LogOut className="w-4 h-4 mr-1" /> Logout</Button>
         </div>
       </header>
@@ -227,6 +229,7 @@ export default function AdminPage() {
                           </TableCell>
                           <TableCell className="text-right space-x-1 py-4">
                             <div className="flex justify-end gap-1">
+                              <Button size="icon" variant="ghost" onClick={() => setSelectedStudent(s)} className="text-primary h-9 w-9 bg-primary/10 hover:bg-primary/20 rounded-xl"><Eye className="w-4 h-4" /></Button>
                               {s.status === 'pending' && (
                                 <>
                                   <Button size="icon" variant="ghost" onClick={() => updateStudentStatus(s.id, 'approved')} className="text-secondary h-9 w-9 bg-secondary/10 hover:bg-secondary/20 rounded-xl"><CheckCircle className="w-5 h-5" /></Button>
@@ -316,8 +319,24 @@ export default function AdminPage() {
               <CardContent className="p-8 pt-6">
                 {tripForm && (
                   <div className="space-y-10">
+                    <div className="pt-4 border-b pb-8">
+                      <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><ImageIcon className="w-5 h-5 text-primary" /> Branding & Headlines</h3>
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Type className="w-3.5 h-3.5" /> App Name (Header/Footer)</Label>
+                          <Input value={tripForm.appName} onChange={e => setTripForm(p => p ? ({ ...p, appName: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" placeholder="e.g. Nameri Voyage" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><ImageIcon className="w-3.5 h-3.5" /> Hero Title (Main Heading)</Label>
+                          <Input value={tripForm.heroTitle} onChange={e => setTripForm(p => p ? ({ ...p, heroTitle: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" placeholder="e.g. LAST TRIP TO NAMERI" />
+                          <p className="text-[10px] text-muted-foreground px-1">Tip: Use \n for a line break</p>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
                       <div className="space-y-6">
+                        <h3 className="text-lg font-bold flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Logistics</h3>
                         <div className="space-y-2">
                           <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> Trip Name</Label>
                           <Input value={tripForm.name} onChange={e => setTripForm(p => p ? ({ ...p, name: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
@@ -339,6 +358,7 @@ export default function AdminPage() {
                       </div>
                       
                       <div className="space-y-6">
+                        <h3 className="text-lg font-bold flex items-center gap-2"><Calendar className="w-5 h-5 text-primary" /> Schedule & Fees</h3>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> Trip Date</Label>
@@ -361,7 +381,7 @@ export default function AdminPage() {
                     </div>
 
                     <div className="pt-8 border-t">
-                      <h3 className="text-lg font-bold mb-6">Staff & Logistics</h3>
+                      <h3 className="text-lg font-bold mb-6">Staff & Itinerary</h3>
                       <div className="space-y-6">
                         <div className="space-y-2">
                           <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest">Organizers (Comma separated)</Label>
@@ -456,6 +476,57 @@ export default function AdminPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Student Detail Modal */}
+      <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
+        <DialogContent className="max-w-md rounded-3xl overflow-hidden border-none shadow-2xl">
+          <DialogHeader className="p-2">
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <UserCheck className="text-primary w-6 h-6" /> Student Details
+            </DialogTitle>
+            <DialogDescription>Full registration data for {selectedStudent?.fullName}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Full Name</p>
+                <p className="font-bold">{selectedStudent?.fullName}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Class / Section</p>
+                <Badge variant="outline" className="rounded-full font-bold">{selectedStudent?.classSection}</Badge>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Phone Number</p>
+                <p className="font-bold flex items-center gap-2"><Phone className="w-3 h-3" /> {selectedStudent?.phone}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Guardian Contact</p>
+                <p className="font-bold flex items-center gap-2"><Shield className="w-3 h-3" /> {selectedStudent?.guardianContact}</p>
+              </div>
+            </div>
+            <div className="space-y-1 bg-muted/30 p-4 rounded-2xl">
+              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest mb-1 flex items-center gap-2">
+                <Stethoscope className="w-3 h-3" /> Medical Information
+              </p>
+              <p className="text-sm leading-relaxed italic">
+                {selectedStudent?.medicalConditions || "No medical conditions or allergies reported."}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">Registration Date</p>
+              <p className="text-xs text-muted-foreground">
+                {selectedStudent?.createdAt ? new Date(selectedStudent.createdAt).toLocaleString() : 'N/A'}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setSelectedStudent(null)} className="w-full rounded-2xl h-12">Close Details</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
