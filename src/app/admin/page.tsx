@@ -177,44 +177,44 @@ export default function AdminPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-primary text-primary-foreground">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium opacity-80">Total Registered</CardTitle>
+            <CardHeader className="pb-2 px-4">
+              <CardTitle className="text-xs font-medium opacity-80 uppercase tracking-wider">Total</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{students.length}</div>
-              <p className="text-xs opacity-60 mt-1">Student submissions</p>
+            <CardContent className="px-4 pb-4">
+              <div className="text-2xl md:text-3xl font-bold">{students.length}</div>
+              <p className="text-[10px] opacity-60 mt-1 truncate">Submissions</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Approved</CardTitle>
+            <CardHeader className="pb-2 px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Approved</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-secondary">{approvedCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">Confirmed attendance</p>
+            <CardContent className="px-4 pb-4">
+              <div className="text-2xl md:text-3xl font-bold text-secondary">{approvedCount}</div>
+              <p className="text-[10px] text-muted-foreground mt-1 truncate">Confirmed</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Fees Collected</CardTitle>
+            <CardHeader className="pb-2 px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fees</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600 flex items-center gap-2">
-                <CreditCard className="w-6 h-6" />
+            <CardContent className="px-4 pb-4">
+              <div className="text-2xl md:text-3xl font-bold text-blue-600 flex items-center gap-1">
+                <CreditCard className="w-4 h-4 md:w-5 md:h-5" />
                 {feesPaidCount}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Paid students</p>
+              <p className="text-[10px] text-muted-foreground mt-1 truncate">Paid Students</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Capacity</CardTitle>
+            <CardHeader className="pb-2 px-4">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Slots</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">40</div>
-              <div className="w-full bg-muted rounded-full h-1.5 mt-3 overflow-hidden">
+            <CardContent className="px-4 pb-4">
+              <div className="text-2xl md:text-3xl font-bold">40</div>
+              <div className="w-full bg-muted rounded-full h-1 mt-3 overflow-hidden">
                 <div className="bg-primary h-full transition-all duration-500" style={{ width: `${(approvedCount / 40) * 100}%` }} />
               </div>
             </CardContent>
@@ -230,7 +230,7 @@ export default function AdminPage() {
 
           <TabsContent value="students">
             <Card className="shadow-sm border">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
+              <CardHeader className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 pb-7">
                 <div>
                   <CardTitle>Registrations</CardTitle>
                   <CardDescription>Verify attendance and track fee payments.</CardDescription>
@@ -246,65 +246,67 @@ export default function AdminPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Student Name</TableHead>
-                      <TableHead>Class</TableHead>
-                      <TableHead>Medical Note</TableHead>
-                      <TableHead>Fees</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredStudents.map((student) => (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-medium">{student.fullName}</TableCell>
-                        <TableCell>{student.classSection}</TableCell>
-                        <TableCell>
-                          <span className={student.medicalConditions !== 'None' ? "text-destructive font-bold" : "text-muted-foreground"}>
-                            {student.medicalConditions}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <button 
-                            onClick={() => updateFeesStatus(student.id, student.feesStatus === 'paid' ? 'unpaid' : 'paid')}
-                            className="focus:outline-none transition-transform active:scale-95"
-                          >
-                            <Badge 
-                              variant={student.feesStatus === 'paid' ? 'default' : 'outline'} 
-                              className={student.feesStatus === 'paid' ? "bg-blue-500 hover:bg-blue-600 cursor-pointer gap-1" : "cursor-pointer gap-1 border-blue-500 text-blue-600 hover:bg-blue-50"}
-                            >
-                              <Banknote className="w-3 h-3" />
-                              {student.feesStatus.toUpperCase()}
-                            </Badge>
-                          </button>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={student.status === 'approved' ? 'default' : student.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize">
-                            {student.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          {student.status === 'pending' && (
-                            <>
-                              <Button size="icon" variant="ghost" className="text-secondary hover:bg-secondary/10" onClick={() => updateStudentStatus(student.id, 'approved')}>
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => updateStudentStatus(student.id, 'rejected')}>
-                                <XCircle className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
-                          <Button size="icon" variant="ghost" className="text-muted-foreground" onClick={() => deleteStudent(student.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student Name</TableHead>
+                        <TableHead>Class</TableHead>
+                        <TableHead>Medical Note</TableHead>
+                        <TableHead>Fees</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredStudents.map((student) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">{student.fullName}</TableCell>
+                          <TableCell>{student.classSection}</TableCell>
+                          <TableCell>
+                            <span className={student.medicalConditions !== 'None' ? "text-destructive font-bold" : "text-muted-foreground"}>
+                              {student.medicalConditions}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <button 
+                              onClick={() => updateFeesStatus(student.id, student.feesStatus === 'paid' ? 'unpaid' : 'paid')}
+                              className="focus:outline-none transition-transform active:scale-95"
+                            >
+                              <Badge 
+                                variant={student.feesStatus === 'paid' ? 'default' : 'outline'} 
+                                className={student.feesStatus === 'paid' ? "bg-blue-500 hover:bg-blue-600 cursor-pointer gap-1" : "cursor-pointer gap-1 border-blue-500 text-blue-600 hover:bg-blue-50"}
+                              >
+                                <Banknote className="w-3 h-3" />
+                                {student.feesStatus.toUpperCase()}
+                              </Badge>
+                            </button>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={student.status === 'approved' ? 'default' : student.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize">
+                              {student.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right space-x-2">
+                            {student.status === 'pending' && (
+                              <>
+                                <Button size="icon" variant="ghost" className="text-secondary hover:bg-secondary/10" onClick={() => updateStudentStatus(student.id, 'approved')}>
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                                <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => updateStudentStatus(student.id, 'rejected')}>
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                            <Button size="icon" variant="ghost" className="text-muted-foreground" onClick={() => deleteStudent(student.id)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
                 {filteredStudents.length === 0 && (
                   <div className="text-center py-12 text-muted-foreground">No students found matching your search.</div>
                 )}
