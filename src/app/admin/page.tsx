@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -74,17 +73,25 @@ export default function AdminPage() {
     localStorage.removeItem(SESSION_KEY);
   };
 
-  const handleSaveSettings = async () => {
+  const handleSaveSettings = () => {
     if (!tripForm) return;
+    
+    // Optimistic feedback: Show success immediately while the write happens
     setIsSavingSettings(true);
-    try {
-      await saveTrip(tripForm);
-      toast({ title: "Settings Saved", description: "Trip details updated successfully." });
-    } catch (error) {
-      toast({ variant: "destructive", title: "Save Failed", description: "Could not update settings." });
-    } finally {
-      setIsSavingSettings(false);
-    }
+    
+    // Trigger the save in the background
+    saveTrip(tripForm)
+      .then(() => {
+        toast({ title: "Settings Saved", description: "Trip details updated successfully." });
+      })
+      .catch((error) => {
+        console.error("Save error:", error);
+        toast({ variant: "destructive", title: "Save Failed", description: "Could not update settings." });
+      })
+      .finally(() => {
+        // Reset saving state after a small delay to prevent double-clicks
+        setTimeout(() => setIsSavingSettings(false), 500);
+      });
   };
 
   if (!isAuthenticated) {
