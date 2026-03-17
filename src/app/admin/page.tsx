@@ -25,7 +25,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const { 
     trip, students, announcements, isInitialized, 
-    saveTrip, updateStudentStatus, updateFeesStatus, deleteStudent, addAnnouncement 
+    saveTrip, updateStudentStatus, updateFeesStatus, deleteStudent, addAnnouncement, deleteAnnouncement 
   } = useNameriStore();
   const { toast } = useToast();
   
@@ -56,7 +56,7 @@ export default function AdminPage() {
       const activities = editingTrip.itinerary.flatMap(i => i.activities);
       const res = await suggestPackingList({
         location: editingTrip.location,
-        durationDays: 1, // Updated for one-day trip
+        durationDays: 1,
         activities: activities
       });
       setEditingTrip(prev => ({ ...prev, packingList: res.packingList }));
@@ -150,7 +150,6 @@ export default function AdminPage() {
   }
 
   const approvedCount = students.filter(s => s.status === 'approved').length;
-  const pendingCount = students.filter(s => s.status === 'pending').length;
   const feesPaidCount = students.filter(s => s.feesStatus === 'paid').length;
 
   const filteredStudents = students.filter(s => 
@@ -470,7 +469,7 @@ export default function AdminPage() {
                       </div>
                       <p className="text-sm text-muted-foreground">{ann.content}</p>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button size="icon" variant="ghost" className="text-destructive h-8 w-8 hover:bg-destructive/10">
+                         <Button size="icon" variant="ghost" className="text-destructive h-8 w-8 hover:bg-destructive/10" onClick={() => deleteAnnouncement(ann.id)}>
                            <Trash2 className="w-4 h-4" />
                          </Button>
                       </div>

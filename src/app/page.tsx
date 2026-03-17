@@ -154,6 +154,36 @@ export default function LandingPage() {
           </section>
         )}
 
+        {/* Participants (Voyagers Joining Us) - Reordered to be after Announcements */}
+        <section id="participants" className="scroll-mt-24">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-headline font-bold">Voyagers Joining Us</h2>
+            <Badge variant="outline" className="text-lg px-4 py-1 text-primary border-primary/30">{students.filter(s => s.status === 'approved').length} Students</Badge>
+          </div>
+          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+            {students.filter(s => s.status === 'approved').map((student) => (
+              <div key={student.id} className="group flex flex-col items-center gap-2 p-2 rounded-xl nature-card-hover">
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary ring-2 ring-primary/10 shadow-lg">
+                  <Image 
+                    src={student.photoUrl || studentAvatar?.imageUrl || ""} 
+                    alt={student.fullName} 
+                    fill 
+                    className="object-cover"
+                    data-ai-hint="portrait avatar"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold truncate max-w-[100px]">{student.fullName}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">{student.classSection}</p>
+                </div>
+              </div>
+            ))}
+            {students.filter(s => s.status === 'approved').length === 0 && (
+              <p className="text-muted-foreground italic">Be the first to join the adventure!</p>
+            )}
+          </div>
+        </section>
+
         {/* Trip Details */}
         <section id="details" className="grid lg:grid-cols-3 gap-8 scroll-mt-24">
           <div className="lg:col-span-2 space-y-8">
@@ -280,36 +310,6 @@ export default function LandingPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
             </div>
-          </div>
-        </section>
-
-        {/* Participants */}
-        <section id="participants" className="scroll-mt-24">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-headline font-bold">Voyagers Joining Us</h2>
-            <Badge variant="outline" className="text-lg px-4 py-1 text-primary border-primary/30">{students.filter(s => s.status === 'approved').length} Students</Badge>
-          </div>
-          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-            {students.filter(s => s.status === 'approved').map((student) => (
-              <div key={student.id} className="group flex flex-col items-center gap-2 p-2 rounded-xl nature-card-hover">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary ring-2 ring-primary/10 shadow-lg">
-                  <Image 
-                    src={student.photoUrl || studentAvatar?.imageUrl || ""} 
-                    alt={student.fullName} 
-                    fill 
-                    className="object-cover"
-                    data-ai-hint="portrait avatar"
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-bold truncate max-w-[100px]">{student.fullName}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">{student.classSection}</p>
-                </div>
-              </div>
-            ))}
-            {students.filter(s => s.status === 'approved').length === 0 && (
-              <p className="text-muted-foreground italic">Be the first to join the adventure!</p>
-            )}
           </div>
         </section>
 

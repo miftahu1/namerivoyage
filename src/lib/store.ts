@@ -139,9 +139,15 @@ export function useNameriStore() {
     localStorage.setItem('nameri_announcements', JSON.stringify(newAnnouncements));
   };
 
+  const deleteAnnouncement = (id: string) => {
+    const newAnnouncements = announcements.filter(a => a.id !== id);
+    setAnnouncements(newAnnouncements);
+    localStorage.setItem('nameri_announcements', JSON.stringify(newAnnouncements));
+  };
+
   return { 
     trip, students, announcements, isInitialized, 
     saveTrip, addStudent, updateStudentStatus, 
-    updateFeesStatus, deleteStudent, addAnnouncement 
+    updateFeesStatus, deleteStudent, addAnnouncement, deleteAnnouncement
   };
 }
