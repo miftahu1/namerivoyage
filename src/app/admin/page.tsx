@@ -270,8 +270,15 @@ export default function AdminPage() {
                         <h4 className="font-bold text-base text-primary">{ann.title}</h4>
                         <span className="text-[10px] font-bold text-muted-foreground uppercase bg-white px-3 py-1 rounded-full shadow-sm">{ann.date}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed pr-8">{ann.content}</p>
-                      <Button size="icon" variant="ghost" className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-destructive h-8 w-8 hover:bg-destructive/10 rounded-full transition-opacity" onClick={() => deleteAnnouncement(ann.id)}><Trash2 className="w-4 h-4" /></Button>
+                      <p className="text-sm text-muted-foreground leading-relaxed pr-10">{ann.content}</p>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="absolute top-4 right-4 text-destructive h-8 w-8 hover:bg-destructive/10 rounded-full transition-colors" 
+                        onClick={() => deleteAnnouncement(ann.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
                   {announcements.length === 0 && (
