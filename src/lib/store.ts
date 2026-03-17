@@ -30,6 +30,8 @@ export interface TripData {
   packingList: string[];
   rules: string[];
   emergencyContact: string;
+  capacity: number;
+  feeAmount: string;
 }
 
 export interface Student {
@@ -71,7 +73,9 @@ const DEFAULT_TRIP: TripData = {
   ],
   packingList: ["Comfortable Shoes", "Water Bottle", "Sunscreen", "Personal Medication", "School ID Card"],
   rules: ["Strict adherence to schedule", "No straying from the group", "Environment conservation"],
-  emergencyContact: "+91 98765-43210 (Mr. Das)"
+  emergencyContact: "+91 98765-43210 (Mr. Das)",
+  capacity: 40,
+  feeAmount: "₹1,500"
 };
 
 export function useNameriStore() {

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useNameriStore } from '@/lib/store';
+import { useNameriStore, TripData } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Bell, Search, CheckCircle, XCircle, Trash2, 
-  LogOut, Shield, Lock, CreditCard, ExternalLink
+  LogOut, Shield, Lock, CreditCard, ExternalLink, Settings, Save, MapPin, Clock, Calendar, UserCheck
 } from 'lucide-react';
 
 const SESSION_KEY = 'nameri_admin_session';
@@ -24,13 +24,15 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const { 
-    students, announcements, 
-    updateStudentStatus, updateFeesStatus, deleteStudent, addAnnouncement, deleteAnnouncement 
+    trip, students, announcements, 
+    updateStudentStatus, updateFeesStatus, deleteStudent, addAnnouncement, deleteAnnouncement, saveTrip 
   } = useNameriStore();
   const { toast } = useToast();
   
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '' });
   const [searchTerm, setSearchTerm] = useState('');
+  const [tripForm, setTripForm] = useState<TripData | null>(null);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   useEffect(() => {
     const session = localStorage.getItem(SESSION_KEY);
@@ -49,6 +51,13 @@ export default function AdminPage() {
     }
   }, []);
 
+  // Sync local form state with remote trip data when it loads
+  useEffect(() => {
+    if (trip && !tripForm) {
+      setTripForm(trip);
+    }
+  }, [trip, tripForm]);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'Nameri@26') {
@@ -63,6 +72,19 @@ export default function AdminPage() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem(SESSION_KEY);
+  };
+
+  const handleSaveSettings = async () => {
+    if (!tripForm) return;
+    setIsSavingSettings(true);
+    try {
+      await saveTrip(tripForm);
+      toast({ title: "Settings Saved", description: "Trip details updated successfully." });
+    } catch (error) {
+      toast({ variant: "destructive", title: "Save Failed", description: "Could not update settings." });
+    } finally {
+      setIsSavingSettings(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -121,21 +143,22 @@ export default function AdminPage() {
             { label: "Total Students", val: students.length, color: "bg-primary" },
             { label: "Confirmed", val: approvedCount, color: "bg-secondary" },
             { label: "Fees Paid", val: feesPaidCount, color: "bg-blue-600" },
-            { label: "Capacity", val: 40, color: "bg-muted text-foreground" },
+            { label: "Capacity", val: `${approvedCount}/${trip.capacity}`, color: "bg-muted text-foreground" },
           ].map((stat, i) => (
             <Card key={i} className={`${stat.color} text-white border-none shadow-lg rounded-3xl`}>
               <CardContent className="p-6 flex flex-col items-center justify-center text-center">
                 <span className="text-[10px] uppercase font-black tracking-widest opacity-80 mb-1">{stat.label}</span>
-                <span className="text-3xl font-black leading-none">{stat.val}</span>
+                <span className="text-2xl font-black leading-none">{stat.val}</span>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <Tabs defaultValue="students" className="space-y-6">
-          <TabsList className="bg-muted/50 rounded-full p-1 w-full sm:w-auto h-auto grid grid-cols-2">
-            <TabsTrigger value="students" className="gap-2 rounded-full py-2.5 px-6"><Users className="w-4 h-4" /> Students</TabsTrigger>
-            <TabsTrigger value="broadcast" className="gap-2 rounded-full py-2.5 px-6"><Bell className="w-4 h-4" /> Updates</TabsTrigger>
+          <TabsList className="bg-muted/50 rounded-full p-1 w-full sm:w-auto h-auto grid grid-cols-3">
+            <TabsTrigger value="students" className="gap-2 rounded-full py-2.5 px-6 text-xs sm:text-sm"><Users className="w-4 h-4" /> Students</TabsTrigger>
+            <TabsTrigger value="broadcast" className="gap-2 rounded-full py-2.5 px-6 text-xs sm:text-sm"><Bell className="w-4 h-4" /> Updates</TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2 rounded-full py-2.5 px-6 text-xs sm:text-sm"><Settings className="w-4 h-4" /> Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="students" className="space-y-4">
@@ -258,9 +281,71 @@ export default function AdminPage() {
               </Card>
             </div>
           </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="rounded-3xl border-none shadow-xl overflow-hidden">
+              <CardHeader className="p-8 pb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl font-bold">Trip Configuration</CardTitle>
+                    <CardDescription>Master controls for voyage logistics and visibility</CardDescription>
+                  </div>
+                  <Button onClick={handleSaveSettings} disabled={isSavingSettings} className="rounded-full gap-2 px-6 h-12 shadow-lg">
+                    {isSavingSettings ? "Saving..." : <><Save className="w-4 h-4" /> Save Changes</>}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-8 pt-6">
+                {tripForm && (
+                  <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Settings className="w-3.5 h-3.5" /> Trip Name</Label>
+                        <Input value={tripForm.name} onChange={e => setTripForm(p => p ? ({ ...p, name: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> Primary Location</Label>
+                        <Input value={tripForm.location} onChange={e => setTripForm(p => p ? ({ ...p, location: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Departure</Label>
+                          <Input value={tripForm.departureTime} onChange={e => setTripForm(p => p ? ({ ...p, departureTime: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> Return</Label>
+                          <Input value={tripForm.returnTime} onChange={e => setTripForm(p => p ? ({ ...p, returnTime: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> Trip Date</Label>
+                          <Input type="date" value={tripForm.startDate} onChange={e => setTripForm(p => p ? ({ ...p, startDate: e.target.value, endDate: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><UserCheck className="w-3.5 h-3.5" /> Capacity</Label>
+                          <Input type="number" value={tripForm.capacity} onChange={e => setTripForm(p => p ? ({ ...p, capacity: parseInt(e.target.value) }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><CreditCard className="w-3.5 h-3.5" /> Trip Fees</Label>
+                        <Input value={tripForm.feeAmount} onChange={e => setTripForm(p => p ? ({ ...p, feeAmount: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" placeholder="e.g. ₹1,500" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2"><Shield className="w-3.5 h-3.5" /> Emergency Contact</Label>
+                        <Input value={tripForm.emergencyContact} onChange={e => setTripForm(p => p ? ({ ...p, emergencyContact: e.target.value }) : null)} className="h-12 rounded-2xl border-muted-foreground/10" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
   );
 }
-
