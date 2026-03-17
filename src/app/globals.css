@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 200 30% 95%; /* #ECF4F7 approx */
+    --background: 120 20% 97%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 200 70% 45%; /* #228DC3 approx */
+    --primary: 142 76% 36%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 167 48% 52%; /* #4CBFA6 approx */
+    --secondary: 158 50% 45%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 210 40% 96.1%;
+    --muted: 120 10% 90%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 167 48% 52%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 142 76% 36%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 200 70% 45%;
+    --border: 120 15% 90%;
+    --input: 120 15% 90%;
+    --ring: 142 76% 36%;
     --radius: 0.75rem;
   }
 
@@ -33,7 +33,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
+    --primary: 142 70% 50%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -45,7 +45,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 142 70% 50%;
   }
 }
 
@@ -59,7 +59,7 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(180deg, rgba(34, 141, 195, 0.2) 0%, rgba(236, 244, 247, 1) 100%);
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.1) 0%, rgba(240, 253, 244, 1) 100%);
 }
 
 .nature-card-hover {
