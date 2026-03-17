@@ -32,7 +32,6 @@ export default function LandingPage() {
   const [submitted, setSubmitted] = useState(false);
 
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-bg');
-  const studentAvatar = PlaceHolderImages.find(img => img.id === 'student-placeholder');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -154,28 +153,21 @@ export default function LandingPage() {
           </section>
         )}
 
-        {/* Participants (Voyagers Joining Us) - Reordered to be after Announcements */}
+        {/* Participants (Voyagers Joining Us) */}
         <section id="participants" className="scroll-mt-24">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-headline font-bold">Voyagers Joining Us</h2>
-            <Badge variant="outline" className="text-lg px-4 py-1 text-primary border-primary/30">{students.filter(s => s.status === 'approved').length} Students</Badge>
+            <Badge variant="outline" className="text-lg px-4 py-1 text-primary border-primary/30">
+              {students.filter(s => s.status === 'approved').length} Students
+            </Badge>
           </div>
-          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+          <div className="flex flex-wrap gap-3 justify-center md:justify-start">
             {students.filter(s => s.status === 'approved').map((student) => (
-              <div key={student.id} className="group flex flex-col items-center gap-2 p-2 rounded-xl nature-card-hover">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary ring-2 ring-primary/10 shadow-lg">
-                  <Image 
-                    src={student.photoUrl || studentAvatar?.imageUrl || ""} 
-                    alt={student.fullName} 
-                    fill 
-                    className="object-cover"
-                    data-ai-hint="portrait avatar"
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-bold truncate max-w-[100px]">{student.fullName}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">{student.classSection}</p>
-                </div>
+              <div key={student.id} className="bg-white border border-primary/10 px-4 py-2 rounded-full shadow-sm nature-card-hover flex items-center gap-3">
+                <span className="font-semibold text-sm whitespace-nowrap">{student.fullName}</span>
+                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">
+                  {student.classSection}
+                </span>
               </div>
             ))}
             {students.filter(s => s.status === 'approved').length === 0 && (
