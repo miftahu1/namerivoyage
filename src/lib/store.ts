@@ -40,18 +40,21 @@ export interface Announcement {
 const DEFAULT_TRIP: TripData = {
   name: "Class 12 Nameri Trip – Arunodoi Academy",
   location: "Nameri National Park, Assam",
-  startDate: "2025-04-15",
-  endDate: "2025-04-17",
-  duration: "3 Days, 2 Nights",
-  departureTime: "07:00 AM, School Main Gate",
-  returnTime: "06:00 PM, School Main Gate",
+  startDate: "2026-03-25",
+  endDate: "2026-03-25",
+  duration: "1 Day",
+  departureTime: "06:00 AM, School Main Gate",
+  returnTime: "08:00 PM, School Main Gate",
   organizedBy: ["Mr. Das", "Mrs. Baruah", "Mr. Sharma"],
   itinerary: [
-    { day: 1, title: "Departure & Arrival", activities: ["Bus Ride", "Tent Assignment", "Evening Bonfire"], description: "Early morning departure from school. Scenic drive to Nameri. Afternoon arrival and camping setup. Evening introduction and bonfire." },
-    { day: 2, title: "Jungle Trek & River Rafting", activities: ["Nature Walk", "White Water Rafting", "Bird Watching"], description: "Morning trek through the sanctuary guided by forest officials. Afternoon river rafting in the Jia Bhoroli river. Exceptional bird watching opportunities." },
-    { day: 3, title: "Cultural Interaction & Return", activities: ["Local Village Visit", "Reflection Session", "Group Photo"], description: "Visit to a nearby Mishing village. Lunch and reflection session before boarding the bus for return journey." }
+    { 
+      day: 1, 
+      title: "Nature & Adventure Day", 
+      activities: ["Jungle Trek", "River Rafting", "Wildlife Observation"], 
+      description: "A high-intensity day starting with an early morning jungle trek through the sanctuary. After a quick forest-side lunch, we'll navigate the Jia Bhoroli river for rafting before heading back to the school by evening." 
+    }
   ],
-  packingList: ["Trekking Shoes", "Warm Jacket", "Rain Coat", "Water Bottle", "Sunscreen", "Personal Medication", "School ID Card"],
+  packingList: ["Comfortable Shoes", "Water Bottle", "Sunscreen", "Personal Medication", "School ID Card", "Camera"],
   rules: ["Strict adherence to schedule", "No straying from the group", "Environment conservation (no littering)", "Respect forest guards and locals", "Smartphone usage restricted during activities"],
   emergencyContact: "+91 98765-43210 (Mr. Das)"
 };
@@ -63,8 +66,8 @@ const DEFAULT_STUDENTS: Student[] = [
 ];
 
 const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
-  { id: '1', date: "March 20, 2025", title: "Registration Deadline", content: "Last date to register is April 5th. Please ensure medical forms are submitted." },
-  { id: '2', date: "March 25, 2025", title: "New Activity Added", content: "We have successfully added an educational visit to the Eco-Camp museum." }
+  { id: '1', date: "March 1, 2026", title: "Trip Confirmation", content: "The Class 12 excursion is confirmed for March 25th. Registration is now open." },
+  { id: '2', date: "March 5, 2026", title: "One-Day Format", content: "Note that this is a focused one-day adventure to ensure all students can participate before exams." }
 ];
 
 export function useNameriStore() {

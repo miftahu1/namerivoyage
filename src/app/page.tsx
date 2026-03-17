@@ -167,7 +167,7 @@ export default function LandingPage() {
             <div className="grid sm:grid-cols-2 gap-6">
               {[
                 { icon: MapPin, label: "Location", val: trip.location },
-                { icon: Calendar, label: "Dates", val: `${new Date(trip.startDate).toLocaleDateString()} – ${new Date(trip.endDate).toLocaleDateString()}` },
+                { icon: Calendar, label: "Date", val: `${new Date(trip.startDate).toLocaleDateString()}` },
                 { icon: Clock, label: "Duration", val: trip.duration },
                 { icon: Send, label: "Departure", val: trip.departureTime },
                 { icon: Users, label: "Organizers", val: trip.organizedBy.join(', ') },
@@ -219,12 +219,10 @@ export default function LandingPage() {
         <section id="itinerary" className="scroll-mt-24">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-headline font-bold mb-4">Journey Roadmap</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">Three days of adventure, learning, and making memories that will last a lifetime.</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">A full day of adventure, learning, and making memories that will last a lifetime.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 relative">
-             <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-y-1/2 -z-10" />
-             
+          <div className="grid md:grid-cols-1 gap-8 relative max-w-2xl mx-auto">
              {trip.itinerary.map((day) => (
                <div key={day.day} className="space-y-4">
                  <div className="relative flex justify-center">
@@ -261,7 +259,7 @@ export default function LandingPage() {
             <div>
               <h2 className="text-3xl font-headline font-bold mb-6 flex items-center gap-3">
                 <Waves className="text-primary" />
-                What to Pack
+                Essential Packing
               </h2>
               <div className="grid grid-cols-2 gap-4">
                 {trip.packingList.map((item, idx) => (

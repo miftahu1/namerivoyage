@@ -56,7 +56,7 @@ export default function AdminPage() {
       const activities = editingTrip.itinerary.flatMap(i => i.activities);
       const res = await suggestPackingList({
         location: editingTrip.location,
-        durationDays: 3,
+        durationDays: 1, // Updated for one-day trip
         activities: activities
       });
       setEditingTrip(prev => ({ ...prev, packingList: res.packingList }));
