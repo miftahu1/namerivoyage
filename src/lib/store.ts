@@ -99,6 +99,9 @@ export function useNameriStore() {
       }
       initializedParts.trip = true;
       checkInit();
+    }, () => {
+      initializedParts.trip = true;
+      checkInit();
     });
 
     // 2. Sync Students
@@ -109,6 +112,9 @@ export function useNameriStore() {
       setStudents(data);
       initializedParts.students = true;
       checkInit();
+    }, () => {
+      initializedParts.students = true;
+      checkInit();
     });
 
     // 3. Sync Announcements
@@ -117,6 +123,9 @@ export function useNameriStore() {
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
       setAnnouncements(data);
+      initializedParts.announcements = true;
+      checkInit();
+    }, () => {
       initializedParts.announcements = true;
       checkInit();
     });
