@@ -42,7 +42,6 @@ export default function LandingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Quick validation
     if (!formData.fullName || !formData.classSection || !formData.phone || !formData.guardianContact) {
       toast({ 
         variant: "destructive", 
@@ -55,17 +54,12 @@ export default function LandingPage() {
     setIsSubmitting(true);
     
     try {
-      // We call the store action. Firestore handles the network layer efficiently.
       await addStudent(formData);
-      
-      // Immediate success transition for better "perceived" speed
       setSubmitted(true);
       toast({ 
         title: "Registration Recorded", 
         description: "Your request has been sent for teacher approval." 
       });
-      
-      // Reset form data for next use if needed
       setFormData({
         fullName: '',
         classSection: '',
@@ -121,11 +115,11 @@ export default function LandingPage() {
           <Badge className="mb-8 bg-primary/10 text-primary border-primary/20 font-bold uppercase tracking-widest py-1.5 px-6 rounded-full">
             {new Date(trip.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </Badge>
-          <h1 className="text-5xl md:text-8xl font-black mb-8 text-primary tracking-tight leading-[0.9]">
-            WILD <br/> CALL
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 text-primary tracking-tight leading-[0.9] uppercase">
+            LAST TRIP <br/> TO NAMERI
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-lg mx-auto font-medium leading-relaxed">
-            Arunodoi Academy's Class 12 expedition to Nameri. One day of pure nature and bonding.
+            Arunodoi Academy's Class 12 grand finale expedition. One day of pure nature and unforgettable bonding.
           </p>
           <Button size="lg" className="rounded-full px-12 h-16 text-xl bg-primary hover:bg-primary/90 shadow-2xl transition-all hover:scale-105 active:scale-95" asChild>
             <a href="#register">Register Now</a>
@@ -141,7 +135,7 @@ export default function LandingPage() {
               <div className="bg-primary/10 p-2.5 rounded-2xl">
                 <Megaphone className="text-primary w-6 h-6" />
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">Broadcasts</h2>
+              <h2 className="text-3xl font-bold tracking-tight">Latest Updates</h2>
             </div>
             <div className="grid gap-6 sm:grid-cols-2">
               {announcements.map((ann) => (
@@ -167,7 +161,7 @@ export default function LandingPage() {
               <div className="bg-primary/10 p-2.5 rounded-2xl">
                 <Users className="text-primary w-6 h-6" />
               </div>
-              <h2 className="text-3xl font-bold tracking-tight">The Crew</h2>
+              <h2 className="text-3xl font-bold tracking-tight">Voyagers Joining Us</h2>
             </div>
             <Badge variant="secondary" className="font-black px-4 py-1.5 rounded-full text-xs uppercase tracking-widest">
               {approvedStudents.length} Confirmed
