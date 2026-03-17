@@ -38,6 +38,19 @@ This is a Next.js application for managing the Class 12 school excursion to Name
    npm run dev
    ```
 
+## Deployment to GitHub
+
+To push your latest changes to GitHub, run the following commands in your terminal:
+
+```bash
+git init
+git remote add origin https://github.com/miftahu1/namerivoyage.git
+git add .
+git commit -m "Complete Nameri Voyage app with real-time sync and blue theme"
+git branch -M main
+git push -u origin main
+```
+
 ## Administrative Access
 
 The admin portal is available at `/admin`. The default access code is `Nameri@26`.

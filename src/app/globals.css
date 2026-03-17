@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 120 20% 97%;
+    --background: 196 32% 95%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 142 76% 36%;
+    --primary: 200 70% 45%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 158 50% 45%;
+    --secondary: 167 47% 52%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 120 10% 90%;
+    --muted: 195 15% 90%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 142 76% 36%;
+    --accent: 167 47% 52%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 120 15% 90%;
-    --input: 120 15% 90%;
-    --ring: 142 76% 36%;
+    --border: 195 15% 85%;
+    --input: 195 15% 85%;
+    --ring: 200 70% 45%;
     --radius: 0.75rem;
   }
 
@@ -33,9 +33,9 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 142 70% 50%;
+    --primary: 200 70% 50%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 167 47% 30%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
@@ -45,7 +45,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 142 70% 50%;
+    --ring: 200 70% 50%;
   }
 }
 
@@ -59,7 +59,7 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(180deg, rgba(22, 163, 74, 0.1) 0%, rgba(240, 253, 244, 1) 100%);
+  background: linear-gradient(180deg, rgba(34, 141, 195, 0.1) 0%, rgba(236, 244, 247, 1) 100%);
 }
 
 .nature-card-hover {
