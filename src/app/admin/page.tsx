@@ -24,7 +24,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const { 
-    students, announcements, isInitialized, 
+    students, announcements, 
     updateStudentStatus, updateFeesStatus, deleteStudent, addAnnouncement, deleteAnnouncement 
   } = useNameriStore();
   const { toast } = useToast();
@@ -64,15 +64,6 @@ export default function AdminPage() {
     setIsAuthenticated(false);
     localStorage.removeItem(SESSION_KEY);
   };
-
-  if (!isInitialized) return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <Shield className="w-10 h-10 text-primary mx-auto animate-pulse mb-4" />
-        <p className="text-xs font-black uppercase tracking-widest text-primary">Authenticating...</p>
-      </div>
-    </div>
-  );
 
   if (!isAuthenticated) {
     return (
@@ -272,3 +263,4 @@ export default function AdminPage() {
     </div>
   );
 }
+

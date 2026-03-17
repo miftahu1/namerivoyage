@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
-  const { trip, students, announcements, isInitialized, addStudent } = useNameriStore();
+  const { trip, students, announcements, addStudent } = useNameriStore();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: '',
@@ -55,13 +55,6 @@ export default function LandingPage() {
       setIsSubmitting(false);
     }
   };
-
-  if (!isInitialized) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-      <TreeDeciduous className="w-12 h-12 text-primary animate-bounce mb-4" />
-      <p className="text-sm font-bold text-primary animate-pulse tracking-widest uppercase">Preparing Voyage...</p>
-    </div>
-  );
 
   const approvedStudents = students.filter(s => s.status === 'approved');
 
@@ -249,3 +242,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
