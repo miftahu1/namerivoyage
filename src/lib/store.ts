@@ -25,6 +25,7 @@ export interface Student {
   guardianContact: string;
   medicalConditions: string;
   status: 'pending' | 'approved' | 'rejected';
+  feesStatus: 'paid' | 'unpaid';
   photoUrl?: string;
   createdAt: string;
 }
@@ -56,9 +57,9 @@ const DEFAULT_TRIP: TripData = {
 };
 
 const DEFAULT_STUDENTS: Student[] = [
-  { id: '1', fullName: "Aryan Sharma", classSection: "12A", phone: "9123456780", guardianContact: "9123456781", medicalConditions: "None", status: 'approved', createdAt: new Date().toISOString() },
-  { id: '2', fullName: "Priya Kalita", classSection: "12B", phone: "9123456782", guardianContact: "9123456783", medicalConditions: "Asthma", status: 'approved', createdAt: new Date().toISOString() },
-  { id: '3', fullName: "Rohan Bora", classSection: "12A", phone: "9123456784", guardianContact: "9123456785", medicalConditions: "None", status: 'pending', createdAt: new Date().toISOString() }
+  { id: '1', fullName: "Aryan Sharma", classSection: "12A", phone: "9123456780", guardianContact: "9123456781", medicalConditions: "None", status: 'approved', feesStatus: 'paid', createdAt: new Date().toISOString() },
+  { id: '2', fullName: "Priya Kalita", classSection: "12B", phone: "9123456782", guardianContact: "9123456783", medicalConditions: "Asthma", status: 'approved', feesStatus: 'unpaid', createdAt: new Date().toISOString() },
+  { id: '3', fullName: "Rohan Bora", classSection: "12A", phone: "9123456784", guardianContact: "9123456785", medicalConditions: "None", status: 'pending', feesStatus: 'unpaid', createdAt: new Date().toISOString() }
 ];
 
 const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
@@ -91,11 +92,12 @@ export function useNameriStore() {
     localStorage.setItem('nameri_trip', JSON.stringify(data));
   };
 
-  const addStudent = (student: Omit<Student, 'id' | 'status' | 'createdAt'>) => {
+  const addStudent = (student: Omit<Student, 'id' | 'status' | 'feesStatus' | 'createdAt'>) => {
     const newStudent: Student = {
       ...student,
       id: Math.random().toString(36).substr(2, 9),
       status: 'pending',
+      feesStatus: 'unpaid',
       createdAt: new Date().toISOString()
     };
     const newStudents = [newStudent, ...students];
@@ -106,6 +108,12 @@ export function useNameriStore() {
 
   const updateStudentStatus = (id: string, status: 'approved' | 'rejected') => {
     const newStudents = students.map(s => s.id === id ? { ...s, status } : s);
+    setStudents(newStudents);
+    localStorage.setItem('nameri_students', JSON.stringify(newStudents));
+  };
+
+  const updateFeesStatus = (id: string, feesStatus: 'paid' | 'unpaid') => {
+    const newStudents = students.map(s => s.id === id ? { ...s, feesStatus } : s);
     setStudents(newStudents);
     localStorage.setItem('nameri_students', JSON.stringify(newStudents));
   };
@@ -128,5 +136,9 @@ export function useNameriStore() {
     localStorage.setItem('nameri_announcements', JSON.stringify(newAnnouncements));
   };
 
-  return { trip, students, announcements, isInitialized, saveTrip, addStudent, updateStudentStatus, deleteStudent, addAnnouncement };
+  return { 
+    trip, students, announcements, isInitialized, 
+    saveTrip, addStudent, updateStudentStatus, 
+    updateFeesStatus, deleteStudent, addAnnouncement 
+  };
 }

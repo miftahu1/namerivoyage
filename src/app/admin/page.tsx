@@ -13,7 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, Map, Bell, Search, CheckCircle, XCircle, Trash2, 
-  Wand2, Save, Plus, LogOut, ExternalLink, Shield, Lock
+  Wand2, Save, Plus, LogOut, ExternalLink, Shield, Lock,
+  Banknote, CreditCard
 } from 'lucide-react';
 import { suggestPackingList } from '@/ai/flows/suggest-packing-list';
 import { generateTripAnnouncements } from '@/ai/flows/generate-trip-announcements-flow';
@@ -24,7 +25,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const { 
     trip, students, announcements, isInitialized, 
-    saveTrip, updateStudentStatus, deleteStudent, addAnnouncement 
+    saveTrip, updateStudentStatus, updateFeesStatus, deleteStudent, addAnnouncement 
   } = useNameriStore();
   const { toast } = useToast();
   
@@ -32,10 +33,10 @@ export default function AdminPage() {
   const [editingTrip, setEditingTrip] = useState(trip);
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '' });
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Updated production password
     if (password === 'Nameri@26') {
       setIsAuthenticated(true);
       toast({ title: "Access Granted", description: "Welcome to the Nameri Voyage management console." });
@@ -150,6 +151,12 @@ export default function AdminPage() {
 
   const approvedCount = students.filter(s => s.status === 'approved').length;
   const pendingCount = students.filter(s => s.status === 'pending').length;
+  const feesPaidCount = students.filter(s => s.feesStatus === 'paid').length;
+
+  const filteredStudents = students.filter(s => 
+    s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    s.classSection.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,16 +194,19 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-secondary">{approvedCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">Confirmed</p>
+              <p className="text-xs text-muted-foreground mt-1">Confirmed attendance</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Fees Collected</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-500">{pendingCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">Awaiting Review</p>
+              <div className="text-3xl font-bold text-blue-600 flex items-center gap-2">
+                <CreditCard className="w-6 h-6" />
+                {feesPaidCount}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Paid students</p>
             </CardContent>
           </Card>
           <Card>
@@ -224,11 +234,16 @@ export default function AdminPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                 <div>
                   <CardTitle>Registrations</CardTitle>
-                  <CardDescription>Verify and manage student attendance.</CardDescription>
+                  <CardDescription>Verify attendance and track fee payments.</CardDescription>
                 </div>
                 <div className="relative w-full max-w-sm">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Filter by name..." className="pl-9" />
+                  <Input 
+                    placeholder="Filter by name or class..." 
+                    className="pl-9" 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
@@ -238,12 +253,13 @@ export default function AdminPage() {
                       <TableHead>Student Name</TableHead>
                       <TableHead>Class</TableHead>
                       <TableHead>Medical Note</TableHead>
+                      <TableHead>Fees</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {students.map((student) => (
+                    {filteredStudents.map((student) => (
                       <TableRow key={student.id}>
                         <TableCell className="font-medium">{student.fullName}</TableCell>
                         <TableCell>{student.classSection}</TableCell>
@@ -251,6 +267,20 @@ export default function AdminPage() {
                           <span className={student.medicalConditions !== 'None' ? "text-destructive font-bold" : "text-muted-foreground"}>
                             {student.medicalConditions}
                           </span>
+                        </TableCell>
+                        <TableCell>
+                          <button 
+                            onClick={() => updateFeesStatus(student.id, student.feesStatus === 'paid' ? 'unpaid' : 'paid')}
+                            className="focus:outline-none transition-transform active:scale-95"
+                          >
+                            <Badge 
+                              variant={student.feesStatus === 'paid' ? 'default' : 'outline'} 
+                              className={student.feesStatus === 'paid' ? "bg-blue-500 hover:bg-blue-600 cursor-pointer gap-1" : "cursor-pointer gap-1 border-blue-500 text-blue-600 hover:bg-blue-50"}
+                            >
+                              <Banknote className="w-3 h-3" />
+                              {student.feesStatus.toUpperCase()}
+                            </Badge>
+                          </button>
                         </TableCell>
                         <TableCell>
                           <Badge variant={student.status === 'approved' ? 'default' : student.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize">
@@ -276,6 +306,9 @@ export default function AdminPage() {
                     ))}
                   </TableBody>
                 </Table>
+                {filteredStudents.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">No students found matching your search.</div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
