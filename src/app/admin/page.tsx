@@ -118,7 +118,13 @@ export default function AdminPage() {
   }
 
   const approvedCount = students.filter(s => s.status === 'approved').length;
-  const feesPaidCount = students.filter(s => s.feesStatus === 'paid').length;
+  
+  // Calculate total collected based on approved students who have paid
+  const feesPaidConfirmedCount = students.filter(s => s.status === 'approved' && s.feesStatus === 'paid').length;
+  const feeNumeric = parseInt(trip.feeAmount.replace(/[^0-9]/g, '')) || 0;
+  const totalCollected = feeNumeric * feesPaidConfirmedCount;
+  const formattedTotal = `₹${totalCollected.toLocaleString('en-IN')}`;
+
   const filteredStudents = students.filter(s => 
     s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
     s.classSection.toLowerCase().includes(searchTerm.toLowerCase())
@@ -142,7 +148,7 @@ export default function AdminPage() {
           {[
             { label: "Total Students", val: students.length, color: "bg-primary" },
             { label: "Confirmed", val: approvedCount, color: "bg-secondary" },
-            { label: "Fees Paid", val: feesPaidCount, color: "bg-blue-600" },
+            { label: "Amount Collected", val: formattedTotal, color: "bg-blue-600" },
             { label: "Capacity", val: `${approvedCount}/${trip.capacity}`, color: "bg-muted text-foreground" },
           ].map((stat, i) => (
             <Card key={i} className={`${stat.color} text-white border-none shadow-lg rounded-3xl`}>
