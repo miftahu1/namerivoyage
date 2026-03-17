@@ -97,10 +97,13 @@ export function useNameriStore() {
       } else {
         setDoc(tripDocRef, DEFAULT_TRIP);
       }
-      initializedParts.trip = true;
-      checkInit();
-    }, () => {
-      initializedParts.trip = true;
+      if (!initializedParts.trip) {
+        initializedParts.trip = true;
+        checkInit();
+      }
+    }, (error) => {
+      console.error("Trip sync error:", error);
+      initializedParts.trip = true; // Mark as initialized anyway to prevent hung UI
       checkInit();
     });
 
@@ -110,9 +113,12 @@ export function useNameriStore() {
     const unsubStudents = onSnapshot(qStudents, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
       setStudents(data);
-      initializedParts.students = true;
-      checkInit();
-    }, () => {
+      if (!initializedParts.students) {
+        initializedParts.students = true;
+        checkInit();
+      }
+    }, (error) => {
+      console.error("Students sync error:", error);
       initializedParts.students = true;
       checkInit();
     });
@@ -123,9 +129,12 @@ export function useNameriStore() {
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Announcement));
       setAnnouncements(data);
-      initializedParts.announcements = true;
-      checkInit();
-    }, () => {
+      if (!initializedParts.announcements) {
+        initializedParts.announcements = true;
+        checkInit();
+      }
+    }, (error) => {
+      console.error("Announcements sync error:", error);
       initializedParts.announcements = true;
       checkInit();
     });
