@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Nature mountains and river theme for trip hero section",
+      "imageUrl": "https://picsum.photos/seed/nameri-hero/1920/1080",
+      "imageHint": "nature mountains"
+    },
+    {
+      "id": "student-placeholder",
+      "description": "Generic avatar for students who don't upload a photo",
+      "imageUrl": "https://picsum.photos/seed/student/200/200",
+      "imageHint": "portrait avatar"
+    }
+  ]
 }
