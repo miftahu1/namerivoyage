@@ -9,12 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  LayoutDashboard, Users, Map, Bell, Settings, 
-  Search, CheckCircle, XCircle, Trash2, Edit, 
-  Wand2, Save, Plus, LogOut, ExternalLink, 
-  TrendingUp, Clock, AlertTriangle, Shield
+  Users, Map, Bell, Search, CheckCircle, XCircle, Trash2, 
+  Wand2, Save, Plus, LogOut, ExternalLink, Shield, Lock
 } from 'lucide-react';
 import { suggestPackingList } from '@/ai/flows/suggest-packing-list';
 import { generateTripAnnouncements } from '@/ai/flows/generate-trip-announcements-flow';
@@ -22,7 +21,7 @@ import { generateItineraryDescription } from '@/ai/flows/generate-itinerary-desc
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
+  const [password, setPassword] = useState('');
   const { 
     trip, students, announcements, isInitialized, 
     saveTrip, updateStudentStatus, deleteStudent, addAnnouncement 
@@ -36,17 +35,18 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginForm.user === 'admin' && loginForm.pass === 'nameri2025') {
+    // Updated production password
+    if (password === 'Nameri@26') {
       setIsAuthenticated(true);
-      toast({ title: "Welcome, Administrator", description: "You have full access to trip management." });
+      toast({ title: "Access Granted", description: "Welcome to the Nameri Voyage management console." });
     } else {
-      toast({ variant: "destructive", title: "Login Failed", description: "Invalid credentials." });
+      toast({ variant: "destructive", title: "Access Denied", description: "Invalid administrator password." });
     }
   };
 
   const handleUpdateTrip = () => {
     saveTrip(editingTrip);
-    toast({ title: "Settings Saved", description: "The trip details have been updated and are live." });
+    toast({ title: "Settings Saved", description: "Trip details updated successfully." });
   };
 
   const handleGeneratePackingList = async () => {
@@ -59,7 +59,7 @@ export default function AdminPage() {
         activities: activities
       });
       setEditingTrip(prev => ({ ...prev, packingList: res.packingList }));
-      toast({ title: "AI Generated", description: "A smart packing list has been created based on your itinerary." });
+      toast({ title: "AI Generated", description: "Packing list updated with AI suggestions." });
     } catch (e) {
       toast({ variant: "destructive", title: "AI Error", description: "Failed to generate packing list." });
     } finally {
@@ -78,7 +78,7 @@ export default function AdminPage() {
         currentDate: new Date().toLocaleDateString()
       });
       setAnnouncementForm(prev => ({ ...prev, content: res.announcementText }));
-      toast({ title: "Announcement Drafted", description: "AI has polished your announcement for maximum impact." });
+      toast({ title: "Draft Created", description: "AI has polished your announcement." });
     } catch (e) {
       toast({ variant: "destructive", title: "AI Error", description: "Failed to generate announcement text." });
     } finally {
@@ -100,7 +100,7 @@ export default function AdminPage() {
       const newItin = [...editingTrip.itinerary];
       newItin[idx] = { ...newItin[idx], description: res.description };
       setEditingTrip(prev => ({ ...prev, itinerary: newItin }));
-      toast({ title: "Description Enhanced", description: "The itinerary entry is now more engaging." });
+      toast({ title: "Content Enhanced", description: "Itinerary description improved by AI." });
     } catch (e) {
        toast({ variant: "destructive", title: "AI Error", description: "Failed to generate description." });
     } finally {
@@ -116,24 +116,32 @@ export default function AdminPage() {
         <Card className="w-full max-w-md shadow-2xl border-primary/20">
           <div className="h-2 bg-primary" />
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-headline font-bold">Admin Portal</CardTitle>
-            <CardDescription>Enter credentials to manage Nameri Voyage</CardDescription>
+            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Lock className="text-primary w-6 h-6" />
+            </div>
+            <CardTitle className="text-2xl font-headline font-bold">Admin Access</CardTitle>
+            <CardDescription>Enter administrator password to continue</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label>Username</Label>
-                <Input value={loginForm.user} onChange={e => setLoginForm(prev => ({ ...prev, user: e.target.value }))} />
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                  id="password"
+                  type="password" 
+                  placeholder="••••••••"
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  autoFocus
+                />
               </div>
-              <div className="space-y-2">
-                <Label>Password</Label>
-                <Input type="password" value={loginForm.pass} onChange={e => setLoginForm(prev => ({ ...prev, pass: e.target.value }))} />
-              </div>
-              <Button type="submit" className="w-full h-11 text-lg">Login</Button>
+              <Button type="submit" className="w-full h-11 text-lg font-semibold bg-primary hover:bg-primary/90">
+                Unlock Portal
+              </Button>
             </form>
           </CardContent>
-          <CardFooter className="justify-center border-t pt-6 bg-muted/30">
-            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Hint: admin / nameri2025</p>
+          <CardFooter className="justify-center border-t pt-4 bg-muted/30">
+            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Secure Teacher Access Only</p>
           </CardFooter>
         </Card>
       </div>
@@ -145,16 +153,15 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navbar */}
       <header className="bg-white border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="text-primary w-6 h-6" />
-            <h1 className="font-headline font-bold text-xl hidden md:block">Nameri Command Center</h1>
+            <h1 className="font-headline font-bold text-xl hidden md:block text-primary">Nameri Command Center</h1>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" asChild>
-              <a href="/" target="_blank"><ExternalLink className="mr-2 h-4 w-4" /> View Site</a>
+              <a href="/" target="_blank"><ExternalLink className="mr-2 h-4 w-4" /> Live Site</a>
             </Button>
             <Button variant="outline" size="sm" onClick={() => setIsAuthenticated(false)}>
               <LogOut className="mr-2 h-4 w-4" /> Logout
@@ -171,7 +178,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{students.length}</div>
-              <p className="text-xs opacity-60 mt-1">Students submitted</p>
+              <p className="text-xs opacity-60 mt-1">Student submissions</p>
             </CardContent>
           </Card>
           <Card>
@@ -180,7 +187,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-secondary">{approvedCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">Confirmed participants</p>
+              <p className="text-xs text-muted-foreground mt-1">Confirmed</p>
             </CardContent>
           </Card>
           <Card>
@@ -189,7 +196,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-orange-500">{pendingCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">Waiting for review</p>
+              <p className="text-xs text-muted-foreground mt-1">Awaiting Review</p>
             </CardContent>
           </Card>
           <Card>
@@ -206,22 +213,22 @@ export default function AdminPage() {
         </div>
 
         <Tabs defaultValue="students" className="space-y-6">
-          <TabsList className="bg-muted/50 p-1 w-full md:w-auto overflow-x-auto">
-            <TabsTrigger value="students" className="gap-2 px-6"><Users className="w-4 h-4" /> Manage Students</TabsTrigger>
-            <TabsTrigger value="trip" className="gap-2 px-6"><Map className="w-4 h-4" /> Trip Content</TabsTrigger>
-            <TabsTrigger value="announcements" className="gap-2 px-6"><Bell className="w-4 h-4" /> Announcements</TabsTrigger>
+          <TabsList className="bg-muted/50 p-1">
+            <TabsTrigger value="students" className="gap-2"><Users className="w-4 h-4" /> Students</TabsTrigger>
+            <TabsTrigger value="trip" className="gap-2"><Map className="w-4 h-4" /> Content</TabsTrigger>
+            <TabsTrigger value="announcements" className="gap-2"><Bell className="w-4 h-4" /> Broadcast</TabsTrigger>
           </TabsList>
 
           <TabsContent value="students">
             <Card className="shadow-sm border">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                 <div>
-                  <CardTitle>Registration Management</CardTitle>
-                  <CardDescription>Review and manage student registration requests.</CardDescription>
+                  <CardTitle>Registrations</CardTitle>
+                  <CardDescription>Verify and manage student attendance.</CardDescription>
                 </div>
                 <div className="relative w-full max-w-sm">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search students..." className="pl-9" />
+                  <Input placeholder="Filter by name..." className="pl-9" />
                 </div>
               </CardHeader>
               <CardContent>
@@ -230,8 +237,7 @@ export default function AdminPage() {
                     <TableRow>
                       <TableHead>Student Name</TableHead>
                       <TableHead>Class</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Medical</TableHead>
+                      <TableHead>Medical Note</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -241,7 +247,6 @@ export default function AdminPage() {
                       <TableRow key={student.id}>
                         <TableCell className="font-medium">{student.fullName}</TableCell>
                         <TableCell>{student.classSection}</TableCell>
-                        <TableCell className="text-xs">{student.phone}</TableCell>
                         <TableCell>
                           <span className={student.medicalConditions !== 'None' ? "text-destructive font-bold" : "text-muted-foreground"}>
                             {student.medicalConditions}
@@ -255,15 +260,15 @@ export default function AdminPage() {
                         <TableCell className="text-right space-x-2">
                           {student.status === 'pending' && (
                             <>
-                              <Button size="icon" variant="ghost" className="text-secondary hover:text-secondary hover:bg-secondary/10" onClick={() => updateStudentStatus(student.id, 'approved')}>
+                              <Button size="icon" variant="ghost" className="text-secondary hover:bg-secondary/10" onClick={() => updateStudentStatus(student.id, 'approved')}>
                                 <CheckCircle className="w-4 h-4" />
                               </Button>
-                              <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => updateStudentStatus(student.id, 'rejected')}>
+                              <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => updateStudentStatus(student.id, 'rejected')}>
                                 <XCircle className="w-4 h-4" />
                               </Button>
                             </>
                           )}
-                          <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-destructive" onClick={() => deleteStudent(student.id)}>
+                          <Button size="icon" variant="ghost" className="text-muted-foreground" onClick={() => deleteStudent(student.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </TableCell>
@@ -279,8 +284,8 @@ export default function AdminPage() {
             <div className="grid lg:grid-cols-2 gap-8">
               <Card className="h-fit">
                 <CardHeader>
-                  <CardTitle>Core Details</CardTitle>
-                  <CardDescription>Basic trip information visible on public page.</CardDescription>
+                  <CardTitle>Trip Overview</CardTitle>
+                  <CardDescription>Global settings for the Nameri Voyage.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                    <div className="grid grid-cols-2 gap-4">
@@ -289,25 +294,15 @@ export default function AdminPage() {
                        <Input value={editingTrip.location} onChange={e => setEditingTrip(p => ({ ...p, location: e.target.value }))} />
                      </div>
                      <div className="space-y-2">
-                       <Label>Duration Text</Label>
+                       <Label>Duration</Label>
                        <Input value={editingTrip.duration} onChange={e => setEditingTrip(p => ({ ...p, duration: e.target.value }))} />
-                     </div>
-                   </div>
-                   <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-2">
-                       <Label>Start Date</Label>
-                       <Input type="date" value={editingTrip.startDate} onChange={e => setEditingTrip(p => ({ ...p, startDate: e.target.value }))} />
-                     </div>
-                     <div className="space-y-2">
-                       <Label>Departure Time/Place</Label>
-                       <Input value={editingTrip.departureTime} onChange={e => setEditingTrip(p => ({ ...p, departureTime: e.target.value }))} />
                      </div>
                    </div>
                    <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <Label>Packing List Items</Label>
-                        <Button variant="outline" size="sm" onClick={handleGeneratePackingList} disabled={isAiLoading} className="h-7 text-xs gap-1 border-primary text-primary">
-                          <Wand2 className="w-3 h-3" /> Use AI Suggestion
+                        <Label>Packing List</Label>
+                        <Button variant="outline" size="sm" onClick={handleGeneratePackingList} disabled={isAiLoading} className="h-7 text-xs border-primary text-primary hover:bg-primary/5">
+                          <Wand2 className="w-3 h-3 mr-1" /> Use AI Suggestion
                         </Button>
                       </div>
                       <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-lg min-h-[100px]">
@@ -320,7 +315,7 @@ export default function AdminPage() {
                           </Badge>
                         ))}
                         <Input 
-                          placeholder="Add new item..." 
+                          placeholder="New item + Enter" 
                           className="h-7 w-32 inline-flex border-none shadow-none bg-transparent" 
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -337,7 +332,7 @@ export default function AdminPage() {
                 </CardContent>
                 <CardFooter className="border-t pt-6">
                   <Button className="w-full gap-2" onClick={handleUpdateTrip}>
-                    <Save className="w-4 h-4" /> Save Trip Configuration
+                    <Save className="w-4 h-4" /> Save Live Changes
                   </Button>
                 </CardFooter>
               </Card>
@@ -358,8 +353,8 @@ export default function AdminPage() {
                           setEditingTrip(p => ({ ...p, itinerary: newItin }));
                         }} className="font-bold border-none shadow-none text-lg h-auto p-0 focus-visible:ring-0" />
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => handleGenerateItineraryDesc(idx)} disabled={isAiLoading} className="text-primary gap-1">
-                        <Wand2 className="w-4 h-4" /> Polish Desc
+                      <Button variant="ghost" size="sm" onClick={() => handleGenerateItineraryDesc(idx)} disabled={isAiLoading} className="text-primary hover:bg-primary/5">
+                        <Wand2 className="w-4 h-4 mr-1" /> AI Polish
                       </Button>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -373,7 +368,7 @@ export default function AdminPage() {
                         className="text-sm min-h-[80px]"
                        />
                        <div className="space-y-2">
-                         <Label className="text-xs uppercase text-muted-foreground font-bold">Daily Activities</Label>
+                         <Label className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">Key Activities</Label>
                          <div className="flex flex-wrap gap-2">
                            {day.activities.map((act, i) => (
                              <Badge key={i} variant="outline" className="text-[10px]">{act}</Badge>
@@ -391,65 +386,65 @@ export default function AdminPage() {
             <div className="grid lg:grid-cols-3 gap-8">
               <Card className="lg:col-span-1 h-fit">
                 <CardHeader>
-                  <CardTitle>Create New Announcement</CardTitle>
-                  <CardDescription>Post updates that will appear on the public page instantly.</CardDescription>
+                  <CardTitle>Broadcast Message</CardTitle>
+                  <CardDescription>Notify students about updates instantly.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Topic / Title</Label>
+                    <Label>Topic</Label>
                     <Input 
-                      placeholder="e.g. Schedule Update" 
+                      placeholder="e.g. Weather Alert" 
                       value={announcementForm.title} 
                       onChange={e => setAnnouncementForm(p => ({ ...p, title: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <Label>Content</Label>
+                      <Label>Message</Label>
                       <Button variant="link" size="sm" className="h-auto p-0 text-primary" onClick={handleGenerateAnnounce} disabled={isAiLoading}>
                         <Wand2 className="w-3 h-3 mr-1" /> AI Draft
                       </Button>
                     </div>
                     <Textarea 
-                      placeholder="Enter the details of your announcement..." 
+                      placeholder="Type details..." 
                       className="min-h-[150px]"
                       value={announcementForm.content}
                       onChange={e => setAnnouncementForm(p => ({ ...p, content: e.target.value }))}
                     />
                   </div>
-                  <Button className="w-full gap-2 h-11" onClick={() => {
+                  <Button className="w-full gap-2 h-11 bg-primary hover:bg-primary/90" onClick={() => {
                     if (announcementForm.title && announcementForm.content) {
                       addAnnouncement(announcementForm.title, announcementForm.content);
                       setAnnouncementForm({ title: '', content: '' });
-                      toast({ title: "Announcement Published" });
+                      toast({ title: "Broadcast Sent" });
                     }
                   }}>
-                    <Plus className="w-4 h-4" /> Publish to Student Page
+                    <Plus className="w-4 h-4" /> Publish Now
                   </Button>
                 </CardContent>
               </Card>
 
               <Card className="lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>Active Announcements</CardTitle>
+                  <CardTitle>Active Feed</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {announcements.map(ann => (
-                    <div key={ann.id} className="p-4 rounded-lg border bg-muted/20 relative group">
+                    <div key={ann.id} className="p-4 rounded-lg border bg-muted/20 relative group hover:border-primary/50 transition-colors">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold">{ann.title}</h4>
+                        <h4 className="font-bold text-primary">{ann.title}</h4>
                         <span className="text-xs text-muted-foreground">{ann.date}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-3">{ann.content}</p>
+                      <p className="text-sm text-muted-foreground">{ann.content}</p>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button size="icon" variant="ghost" className="text-destructive h-8 w-8">
+                         <Button size="icon" variant="ghost" className="text-destructive h-8 w-8 hover:bg-destructive/10">
                            <Trash2 className="w-4 h-4" />
                          </Button>
                       </div>
                     </div>
                   ))}
                   {announcements.length === 0 && (
-                    <div className="text-center py-12 text-muted-foreground italic">No announcements posted yet.</div>
+                    <div className="text-center py-12 text-muted-foreground italic">No active announcements.</div>
                   )}
                 </CardContent>
               </Card>
