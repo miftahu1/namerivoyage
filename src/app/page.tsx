@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -77,14 +76,23 @@ export default function LandingPage() {
 
       <section className="relative h-[60vh] flex items-center justify-center pt-16">
         <div className="absolute inset-0 z-0">
-          <Image src={heroImage?.imageUrl || ""} alt="Nameri" fill className="object-cover opacity-10" priority />
+          <Image 
+            src={heroImage?.imageUrl || ""} 
+            alt="Nameri" 
+            fill 
+            className="object-cover opacity-10" 
+            priority 
+            data-ai-hint="nature mountains"
+          />
           <div className="absolute inset-0 hero-gradient" />
         </div>
         <div className="relative z-10 text-center px-4">
-          <Badge className="mb-4 bg-primary/20 text-primary border-primary/30 font-bold">MARCH 25, 2026</Badge>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-primary">Wild Nameri</h1>
-          <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">Class 12 Educational Excursion to Nameri National Park.</p>
-          <Button size="lg" className="rounded-full px-8 bg-primary hover:bg-primary/90" asChild>
+          <Badge className="mb-4 bg-primary/20 text-primary border-primary/30 font-bold uppercase tracking-wider">
+            {new Date(trip.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </Badge>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-primary tracking-tight">Wild Nameri</h1>
+          <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">Class 12 Educational Excursion to Nameri National Park. Experience nature, adventure, and bonding.</p>
+          <Button size="lg" className="rounded-full px-8 bg-primary hover:bg-primary/90 shadow-lg" asChild>
             <a href="#register">Register Now</a>
           </Button>
         </div>
@@ -99,14 +107,14 @@ export default function LandingPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {announcements.map((ann) => (
-                <Card key={ann.id} className="border-l-4 border-l-primary bg-card/50">
+                <Card key={ann.id} className="border-l-4 border-l-primary bg-card/50 backdrop-blur-sm">
                   <CardHeader className="p-4 pb-1">
                     <CardTitle className="text-sm font-bold flex justify-between items-center">
                       {ann.title}
-                      <span className="text-[10px] text-muted-foreground">{ann.date}</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">{ann.date}</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 pt-0 text-xs text-muted-foreground">{ann.content}</CardContent>
+                  <CardContent className="p-4 pt-0 text-xs text-muted-foreground leading-relaxed">{ann.content}</CardContent>
                 </Card>
               ))}
             </div>
@@ -116,57 +124,84 @@ export default function LandingPage() {
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold">Voyagers Board</h2>
-            <Badge variant="outline" className="text-primary border-primary/30">{approvedStudents.length} Ready</Badge>
+            <Badge variant="outline" className="text-primary border-primary/30 font-bold">{approvedStudents.length} Ready</Badge>
           </div>
           <div className="flex flex-wrap gap-2">
             {approvedStudents.map((student) => (
-              <div key={student.id} className="bg-white border px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 shadow-sm">
-                {student.fullName} <span className="opacity-50 text-[10px]">{student.classSection}</span>
+              <div key={student.id} className="bg-white border px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 shadow-sm hover:shadow-md transition-shadow border-primary/10">
+                {student.fullName} <span className="opacity-40 text-[10px] bg-muted px-1.5 py-0.5 rounded">{student.classSection}</span>
               </div>
             ))}
-            {approvedStudents.length === 0 && <p className="text-muted-foreground italic text-xs">Waiting for first registration...</p>}
+            {approvedStudents.length === 0 && <p className="text-muted-foreground italic text-xs">Waiting for the first registration...</p>}
           </div>
         </section>
 
-        <section className="grid sm:grid-cols-2 gap-8">
+        <section className="grid sm:grid-cols-2 gap-12 items-start">
           <div className="space-y-6">
-            <h2 className="text-xl font-bold">Essentials</h2>
-            <div className="grid gap-3">
+            <h2 className="text-xl font-bold">Voyage Essentials</h2>
+            <div className="grid gap-4">
               {[
-                { icon: MapPin, val: trip.location },
-                { icon: Clock, val: trip.departureTime },
-                { icon: Users, val: trip.organizedBy.join(', ') },
+                { icon: MapPin, label: "Location", val: trip.location },
+                { icon: Clock, label: "Departure", val: trip.departureTime },
+                { icon: Users, label: "Organized By", val: trip.organizedBy.join(', ') },
+                { icon: Calendar, label: "Duration", val: trip.duration },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 rounded-lg border bg-card/30">
-                  <item.icon className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">{item.val}</span>
+                <div key={idx} className="flex items-center gap-4 p-4 rounded-xl border bg-white/50 shadow-sm">
+                  <div className="bg-primary/10 p-2 rounded-lg">
+                    <item.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase">{item.label}</p>
+                    <p className="text-sm font-medium">{item.val}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-          <div id="register">
-            <Card className="shadow-lg border-primary/20">
+          
+          <div id="register" className="scroll-mt-24">
+            <Card className="shadow-2xl border-primary/20 overflow-hidden">
+              <div className="h-2 bg-primary" />
               <CardHeader className="text-center pb-2">
-                <CardTitle className="text-lg">Registration</CardTitle>
+                <CardTitle className="text-xl font-bold">Join the Voyage</CardTitle>
+                <CardDescription>Fill in your details to secure your spot</CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 {submitted ? (
-                  <div className="text-center py-4 space-y-3">
-                    <ShieldCheck className="w-10 h-10 text-primary mx-auto" />
-                    <p className="text-sm font-bold">Request Sent!</p>
-                    <p className="text-xs text-muted-foreground">Wait for teacher approval.</p>
+                  <div className="text-center py-8 space-y-4">
+                    <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                      <ShieldCheck className="w-10 h-10 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-primary">Request Sent!</p>
+                      <p className="text-sm text-muted-foreground">Please wait for teacher approval. We'll verify your details soon.</p>
+                    </div>
+                    <Button variant="outline" onClick={() => setSubmitted(false)} className="w-full">Register Another Student</Button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input name="fullName" placeholder="Full Name" required value={formData.fullName} onChange={handleInputChange} className="h-9" />
-                    <Input name="classSection" placeholder="Class-Sec (e.g. 12-A)" required value={formData.classSection} onChange={handleInputChange} className="h-9" />
-                    <div className="grid grid-cols-2 gap-3">
-                      <Input name="phone" placeholder="Your Phone" required type="tel" value={formData.phone} onChange={handleInputChange} className="h-9" />
-                      <Input name="guardianContact" placeholder="Parent Phone" required type="tel" value={formData.guardianContact} onChange={handleInputChange} className="h-9" />
+                    <div className="space-y-1">
+                      <Label htmlFor="fullName" className="text-xs font-bold uppercase text-muted-foreground">Full Name</Label>
+                      <Input id="fullName" name="fullName" placeholder="As per school records" required value={formData.fullName} onChange={handleInputChange} className="h-10" />
                     </div>
-                    <Button type="submit" className="w-full h-10 font-bold" disabled={isSubmitting}>
-                      {isSubmitting ? "Sending..." : "Confirm Join"}
+                    <div className="space-y-1">
+                      <Label htmlFor="classSection" className="text-xs font-bold uppercase text-muted-foreground">Class & Section</Label>
+                      <Input id="classSection" name="classSection" placeholder="e.g. 12-A" required value={formData.classSection} onChange={handleInputChange} className="h-10" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label htmlFor="phone" className="text-xs font-bold uppercase text-muted-foreground">Your Phone</Label>
+                        <Input id="phone" name="phone" placeholder="10-digit" required type="tel" value={formData.phone} onChange={handleInputChange} className="h-10" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="guardianContact" className="text-xs font-bold uppercase text-muted-foreground">Guardian Phone</Label>
+                        <Input id="guardianContact" name="guardianContact" placeholder="Emergency" required type="tel" value={formData.guardianContact} onChange={handleInputChange} className="h-10" />
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full h-11 font-bold text-lg bg-primary hover:bg-primary/90 mt-2" disabled={isSubmitting}>
+                      {isSubmitting ? "Processing..." : "Confirm My Spot"}
                     </Button>
+                    <p className="text-[10px] text-center text-muted-foreground">By registering, you agree to follow all trip safety guidelines and school rules.</p>
                   </form>
                 )}
               </CardContent>
@@ -175,8 +210,14 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="py-8 border-t text-center">
-        <p className="text-[10px] text-muted-foreground uppercase font-bold">&copy; 2026 Arunodoi Academy Class 12</p>
+      <footer className="py-12 border-t bg-muted/30">
+        <div className="max-w-4xl mx-auto px-4 text-center space-y-4">
+          <div className="flex items-center justify-center gap-2">
+            <TreeDeciduous className="text-primary w-4 h-4" />
+            <span className="font-bold text-sm tracking-widest uppercase">Nameri Voyage 2026</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">&copy; 2026 Arunodoi Academy | Class 12 Educational Excursion</p>
+        </div>
       </footer>
     </div>
   );
